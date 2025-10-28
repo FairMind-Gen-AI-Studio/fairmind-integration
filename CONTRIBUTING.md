@@ -7,9 +7,33 @@ Thank you for your interest in contributing to the Fairmind Integration Plugin! 
 ### Prerequisites
 
 1. **Claude Code** installed and configured
-2. **Fairmind MCP Server** installed and running
-3. **Node.js** (for MCP server)
+2. **Fairmind MCP Server** access (HTTP-based remote server)
+3. **Fairmind authentication token** (Bearer token)
 4. **Git** for version control
+
+### MCP Server Setup
+
+Configure the Fairmind MCP server in your `~/.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "Fairmind": {
+      "type": "http",
+      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
+      }
+    }
+  }
+}
+```
+
+Or use the Claude CLI:
+
+```bash
+claude mcp add --transport http Fairmind https://project-context.mindstream.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
+```
 
 ### Local Development
 
