@@ -22,9 +22,9 @@
       "repository": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git",
       "strict": false,
       "skills": [
-        "./skills/fairmind-context",
-        "./skills/fairmind-tdd",
-        "./skills/fairmind-code-review"
+        "./fairmind-context",
+        "./fairmind-tdd",
+        "./fairmind-code-review"
       ]
     }
   ]
