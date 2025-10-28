@@ -36,22 +36,31 @@ This plugin **requires** the Fairmind MCP server to be installed and configured.
 
 ### MCP Server Configuration
 
+**Option 1: Using settings.json**
+
 Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 
 ```json
 {
   "mcpServers": {
     "Fairmind": {
-      "command": "node",
-      "args": ["/path/to/fairmind-mcp-server/dist/index.js"],
-      "env": {
-        "FAIRMIND_API_URL": "https://api.fairmind.com",
-        "FAIRMIND_API_KEY": "your-api-key"
+      "type": "http",
+      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_TOKEN_HERE"
       }
     }
   }
 }
 ```
+
+**Option 2: Using Claude CLI**
+
+```bash
+claude mcp add --transport http Fairmind https://project-context.mindstream.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
+```
+
+Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
 
 ## Installation
 
@@ -305,14 +314,20 @@ For consistent team setup, commit `.claude/settings.json` with:
   },
   "mcpServers": {
     "Fairmind": {
-      "command": "node",
-      "args": ["${workspaceFolder}/node_modules/@fairmind/mcp-server/dist/index.js"],
-      "env": {
-        "FAIRMIND_API_URL": "${env:FAIRMIND_API_URL}"
+      "type": "http",
+      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "headers": {
+        "Authorization": "Bearer ${env:FAIRMIND_TOKEN}"
       }
     }
   }
 }
+```
+
+**Note:** Use environment variable `FAIRMIND_TOKEN` to avoid committing tokens to version control. Team members should set their own token:
+
+```bash
+export FAIRMIND_TOKEN="your-token-here"
 ```
 
 ## Best Practices
