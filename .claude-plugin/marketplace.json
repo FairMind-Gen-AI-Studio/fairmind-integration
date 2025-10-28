@@ -11,15 +11,8 @@
   "plugins": [
     {
       "name": "fairmind-integration",
-      "source": "./",
       "description": "Team collaboration agents and skills with Fairmind platform integration. Includes 12 specialized agents, 3 Fairmind-aware skills for TDD and code review, and full traceability from implementation plans to code.",
-      "author": {
-        "name": "Alexio Cassani"
-      },
-      "version": "1.0.0",
-      "license": "MIT",
-      "homepage": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration",
-      "repository": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git",
+      "source": "./",
       "strict": false,
       "skills": [
         "./fairmind-context",
