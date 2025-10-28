@@ -72,13 +72,13 @@ claude plugin install fairmind-integration --project
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_ORG/fairmind-claude-agents.git
+git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git
 
 # Create symbolic link to Claude Code plugins directory
-ln -s $(pwd)/fairmind-claude-agents ~/.claude/plugins/fairmind-integration
+ln -s $(pwd)/fairmind-integration ~/.claude/plugins/fairmind-integration
 
 # Or copy to project-specific location
-cp -r fairmind-claude-agents /path/to/your/project/.claude/plugins/fairmind-integration
+cp -r fairmind-integration /path/to/your/project/.claude/plugins/fairmind-integration
 ```
 
 ### Option 3: Team Installation
@@ -396,6 +396,6 @@ Integrates with [Fairmind AI Studio](https://fairmind.com) platform.
 
 ## Support
 
-- **Issues:** https://github.com/YOUR_ORG/fairmind-claude-agents/issues
+- **Issues:** https://github.com/FairMind-Gen-AI-Studio/fairmind-integration/issues
 - **Documentation:** https://docs.fairmind.com/claude-integration
 - **Fairmind Support:** support@fairmind.com

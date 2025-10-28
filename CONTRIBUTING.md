@@ -15,8 +15,8 @@ Thank you for your interest in contributing to the Fairmind Integration Plugin! 
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_ORG/fairmind-claude-agents.git
-cd fairmind-claude-agents
+git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git
+cd fairmind-integration
 
 # Create symlink for testing
 ln -s $(pwd) ~/.claude/plugins/fairmind-integration-dev
