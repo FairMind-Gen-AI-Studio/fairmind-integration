@@ -1,0 +1,66 @@
+{
+  "name": "fairmind-marketplace",
+  "owner": {
+    "name": "Alexio Cassani",
+    "email": "alexio@fairmind.com"
+  },
+  "metadata": {
+    "description": "Official Fairmind Integration Plugin marketplace for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "fairmind-integration",
+      "source": ".",
+      "version": "1.0.0",
+      "displayName": "Fairmind Integration",
+      "description": "Team collaboration agents and skills with Fairmind platform integration. Includes 12 specialized agents, 3 Fairmind-aware skills for TDD and code review, and full traceability from implementation plans to code.",
+      "author": "Alexio Cassani",
+      "license": "MIT",
+      "homepage": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration",
+      "repository": {
+        "type": "git",
+        "url": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git"
+      },
+      "keywords": [
+        "fairmind",
+        "team-collaboration",
+        "agents",
+        "skills",
+        "tdd",
+        "code-review",
+        "mcp",
+        "project-management"
+      ],
+      "components": {
+        "agents": [
+          "ai-engineer",
+          "backend-engineer",
+          "frontend-engineer",
+          "qa-engineer",
+          "code-reviewer",
+          "cybersec-engineer",
+          "debug-detective",
+          "backend-issue-fixer",
+          "frontend-issue-fixer",
+          "playwright-issue-analyzer",
+          "pr-diff-documenter",
+          "tech-lead-software-architect"
+        ],
+        "skills": [
+          "fairmind-context",
+          "fairmind-tdd",
+          "fairmind-code-review"
+        ],
+        "commands": []
+      },
+      "requirements": {
+        "mcp": {
+          "required": true,
+          "servers": ["Fairmind"],
+          "description": "This plugin requires the Fairmind MCP server to be configured. It provides access to 40 tools across General, Studio, and Code categories for project management, requirements tracking, and cross-repository analysis."
+        }
+      }
+    }
+  ]
+}
