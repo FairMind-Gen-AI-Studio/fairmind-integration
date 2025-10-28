@@ -108,7 +108,7 @@ For automatic installation across your team, add to your repository's `.claude/s
 ```
 fairmind-integration/
 ├── .claude-plugin/
-│   └── plugin.json          # Plugin metadata
+│   └── marketplace.json      # Plugin marketplace metadata
 ├── agents/                   # 12 specialized agents
 │   ├── ai-engineer.md
 │   ├── backend-engineer.md
@@ -122,11 +122,15 @@ fairmind-integration/
 │   ├── playwright-issue-analyzer.md
 │   ├── pr-diff-documenter.md
 │   └── tech-lead-software-architect.md
-├── skills/                   # 3 Fairmind skills
-│   ├── fairmind-context.md
-│   ├── fairmind-tdd.md
-│   └── fairmind-code-review.md
+├── fairmind-context/         # Fairmind context gathering skill
+│   └── SKILL.md
+├── fairmind-tdd/             # Fairmind TDD workflow skill
+│   └── SKILL.md
+├── fairmind-code-review/     # Fairmind code review skill
+│   └── SKILL.md
 ├── commands/                 # Optional slash commands
+├── skills/                   # Skills documentation
+│   └── README.md
 └── README.md
 ```
 
@@ -373,15 +377,16 @@ If skills can't find Fairmind context:
 
 1. Create new agent file in `agents/`
 2. Follow existing agent format
-3. Update `.claude-plugin/plugin.json` components list
+3. Agents are automatically discovered by Claude Code
 4. Test with Claude Code
 
 ### Creating Additional Skills
 
-1. Create skill file in `skills/`
-2. Follow Fairmind skill naming convention
-3. Use `fairmind-context` as foundation
-4. Update plugin.json and README
+1. Create skill directory in root (e.g., `fairmind-newskill/`)
+2. Add `SKILL.md` file inside the directory following Claude Code format
+3. Follow Fairmind skill naming convention (`fairmind-*`)
+4. Use `fairmind-context` as foundation
+5. Update marketplace.json skills array and README
 
 ## Version History
 
@@ -407,10 +412,9 @@ Contributions welcome! Please:
 ## Acknowledgments
 
 Built for [Claude Code](https://claude.com/claude-code) by Anthropic.
-Integrates with [Fairmind AI Studio](https://fairmind.com) platform.
+Integrates with [Fairmind AI Studio](https://fairmind.ai) platform.
 
 ## Support
 
 - **Issues:** https://github.com/FairMind-Gen-AI-Studio/fairmind-integration/issues
-- **Documentation:** https://docs.fairmind.com/claude-integration
-- **Fairmind Support:** support@fairmind.com
+- **Fairmind Support:** support@fairmind.ai
