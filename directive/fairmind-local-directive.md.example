@@ -1,0 +1,7 @@
+#environment
+
+- Fairmind url: http://localhost:3000
+- Fairmind project: Mindstream
+- Fairmind environment: local
+- Fairmind user: youremail@example.com
+- Fairmind password: bestpassword
