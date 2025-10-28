@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html { background: #ffffff; }
+body {
+  width: 720pt; height: 405pt; margin: 0; padding: 0;
+  background: #1C2833; font-family: Arial, sans-serif;
+  display: flex; flex-direction: column;
+}
+.header {
+  background: #2E4053; padding: 16pt 40pt; border-bottom: 4pt solid #5EA8A7;
+}
+.header h1 {
+  color: #F4F6F6; font-size: 32pt; margin: 0;
+  font-weight: bold;
+}
+.subtitle {
+  color: #AAB7B8; font-size: 11pt; margin: 3pt 0 0 0;
+}
+.content {
+  flex: 1; padding: 18pt 40pt; display: flex;
+}
+.col-left {
+  width: 50%; margin-right: 20pt;
+}
+.col-right {
+  flex: 1;
+}
+.section {
+  background: #2C3E50; border-radius: 6pt; padding: 10pt; margin-bottom: 10pt;
+  border-left: 4pt solid #5EA8A7;
+}
+.section h2 {
+  color: #5EA8A7; font-size: 13pt; margin: 0 0 5pt 0;
+  font-weight: bold;
+}
+.section p {
+  color: #F4F6F6; font-size: 8.5pt; margin: 0 0 4pt 0;
+  line-height: 1.3;
+}
+.section ul {
+  margin: 0; padding-left: 16pt; color: #F4F6F6; font-size: 8pt;
+  line-height: 1.25;
+}
+.section li {
+  margin-bottom: 1pt;
+}
+.highlight {
+  background: #34495E; border-radius: 4pt; padding: 10pt; margin-top: 8pt;
+}
+.highlight p {
+  color: #F39C12; font-size: 9pt; margin: 0; font-weight: bold;
+}
+.steps {
+  background: #2C3E50; border-radius: 6pt; padding: 10pt;
+  border-left: 4pt solid #F39C12;
+}
+.steps p {
+  color: #F4F6F6; font-size: 8.5pt; margin: 0 0 4pt 0;
+  line-height: 1.3;
+  font-weight: bold;
+}
+.steps ul {
+  margin: 0; padding-left: 16pt; color: #F4F6F6; font-size: 8pt;
+  line-height: 1.25;
+}
+.steps li {
+  margin-bottom: 2pt;
+}
+.arrow {
+  color: #5EA8A7; font-weight: bold;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>fairmind-context Skill</h1>
+  <p class="subtitle">Foundation: Comprehensive Context Gathering</p>
+</div>
+<div class="content">
+  <div class="col-left">
+    <div class="section">
+      <h2>What It Does</h2>
+      <p>Raccoglie TUTTO il contesto necessario prima di iniziare qualsiasi lavoro su Fairmind. È la base per le altre skill.</p>
+    </div>
+    <div class="section">
+      <h2>8-Step Process</h2>
+      <ul>
+        <li>1. Identify project</li>
+        <li>2. Identify active session</li>
+        <li>3. Gather task (implementation plan)</li>
+        <li>4. Gather user story (acceptance criteria)</li>
+        <li>5. Gather requirements (functional + technical)</li>
+        <li>6. Gather test expectations</li>
+        <li>7. Gather documentation via RAG</li>
+        <li>8. Cross-project context (if integrations)</li>
+      </ul>
+    </div>
+    <div class="highlight">
+      <p>Output: Structured document with all gathered info</p>
+    </div>
+  </div>
+  <div class="col-right">
+    <div class="steps">
+      <p>Why It Matters</p>
+      <ul>
+        <li>Prevents working with incomplete information</li>
+        <li>Ensures alignment with business requirements</li>
+        <li>Identifies integration points early</li>
+        <li>Foundation for fairmind-tdd and fairmind-code-review</li>
+      </ul>
+    </div>
+    <div class="section" style="margin-top: 12pt;">
+      <h2>Key Benefits</h2>
+      <ul>
+        <li>No guessing: All info from Fairmind sources</li>
+        <li>Complete picture: Task, story, requirements, tests</li>
+        <li>Cross-project support: Understands integrations</li>
+        <li>Reusable: Same process for all development work</li>
+      </ul>
+    </div>
+    <div class="section">
+      <h2>Next Steps After Context</h2>
+      <p>Implementation <span class="arrow">→</span> Use fairmind-tdd</p>
+      <p>Code Review <span class="arrow">→</span> Use fairmind-code-review</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>
