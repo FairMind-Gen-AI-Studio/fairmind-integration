@@ -37,3 +37,6 @@ yarn-error.log*
 
 # Git worktrees
 .worktrees/
+
+# Data directory (contains session databases and analysis files)
+data/
