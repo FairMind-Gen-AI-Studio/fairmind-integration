@@ -19,7 +19,13 @@
       "version": "1.0.0",
       "license": "MIT",
       "homepage": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration",
-      "repository": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git"
+      "repository": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git",
+      "strict": false,
+      "skills": [
+        "./skills/fairmind-context",
+        "./skills/fairmind-tdd",
+        "./skills/fairmind-code-review"
+      ]
     }
   ]
 }
