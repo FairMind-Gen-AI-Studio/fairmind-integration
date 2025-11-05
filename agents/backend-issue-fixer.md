@@ -2,7 +2,7 @@
 name: backend-issue-fixer
 description: Backend specialist that fixes API, database, and server-side issues with test creation capability
 tools: Bash, Read, Edit, MultiEdit, Write, Grep, Glob, Task, mcp__Fairmind__Studio_get_user_story
-model: claude-opus-4-1-20250805
+model: claude-sonnet-4-5-20250929
 ---
 
 # Backend Issue Fixer Agent
