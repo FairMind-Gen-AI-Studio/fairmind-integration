@@ -7,7 +7,7 @@ model: claude-opus-4-1-20250805
 
 # Enhanced Issue Fix Orchestrator
 
-You orchestrate issue resolution by classifying issues, confirming with user, and delegating to specialized agents.
+You orchestrate issue resolution by classifying issues, confirming with user, and delegating to the Echo (Software Engineer) agent with appropriate skills.
 
 Issue to process: $ARGUMENTS
 
@@ -25,16 +25,19 @@ Analyze the issue to determine its category:
 - Keywords: display, visual, skeleton, layout, CSS, style, UI, rendering
 - Screenshots showing visual problems
 - No API/backend errors mentioned
+- **Skill to load**: `frontend-react-nextjs`
 
 **FE-BE (Frontend-Backend Integration)**:
 - Keywords: data, fetch, API response, loading, undefined, null data
 - Network errors or data binding issues
 - Frontend errors related to backend data
+- **Skills to load**: `frontend-react-nextjs` + `backend-nextjs`
 
 **BE-BE (Backend Only)**:
 - Keywords: API, endpoint, database, query, field names, server error
 - HTTP error codes (500, 404, etc.)
 - No frontend components mentioned
+- **Skill to load**: `backend-nextjs` (or `backend-python` if Python project)
 
 ### 3. User Confirmation (ALWAYS unless --type specified)
 
@@ -47,6 +50,7 @@ Present classification to user:
 Issue Classification Analysis:
 - Detected indicators: [list key findings]
 - Suggested type: [fe-fe|fe-be|be-be]
+- Skill(s) to load: [skill names]
 - Confidence: [percentage]
 
 Please confirm issue type (y/[fe-fe|fe-be|be-be]):
@@ -69,82 +73,99 @@ Use TodoWrite to create execution plan:
 ## Phase 3: Agent Delegation
 
 ### For FE-FE Issues:
-Launch frontend-issue-fixer agent:
+Launch Echo (Software Engineer) with frontend skill:
 ```yaml
 Task:
   description: "Fix frontend issue"
-  subagent_type: "frontend-issue-fixer"
+  subagent_type: "fairmind-integration:Echo (Software Engineer)"
   prompt: |
     Fix the frontend issue: $ARGUMENTS
-    Issue type: FE-FE
+    Issue type: FE-FE (Frontend Only)
 
-    Use Playwright MCP tools to:
-    1. Navigate to affected page
-    2. Reproduce the visual issue
-    3. Identify and fix the problem
-    4. Validate the fix
+    IMPORTANT: Load the `frontend-react-nextjs` skill first for React/NextJS patterns.
+
+    Steps:
+    1. Load the skill using the Skill tool
+    2. Navigate to affected page using Playwright MCP tools
+    3. Reproduce the visual issue
+    4. Identify and fix the problem using skill patterns
+    5. Validate the fix with Playwright
 
     Write report to: ./analyzer-output/[issue]-report-[iteration].md
     Return the report path.
 ```
 
 ### For BE-BE Issues:
-Launch backend-issue-fixer agent:
+Launch Echo (Software Engineer) with backend skill:
 ```yaml
 Task:
   description: "Fix backend issue"
-  subagent_type: "backend-issue-fixer"
+  subagent_type: "fairmind-integration:Echo (Software Engineer)"
   prompt: |
     Fix the backend issue: $ARGUMENTS
-    Issue type: BE-BE
+    Issue type: BE-BE (Backend Only)
 
-    1. Run tests to reproduce issue
-    2. If no test covers it, create new test
-    3. Fix the backend logic/API
-    4. Validate all tests pass
+    IMPORTANT: Load the `backend-nextjs` skill first (or `backend-python` for Python projects).
+
+    Steps:
+    1. Load the appropriate backend skill using the Skill tool
+    2. Run tests to reproduce issue
+    3. If no test covers it, create new test
+    4. Fix the backend logic/API following skill patterns
+    5. Validate all tests pass
 
     Write report to: ./analyzer-output/[issue]-report-[iteration].md
     Return the report path.
 ```
 
 ### For FE-BE Issues:
-Sequential execution:
+Sequential execution with Echo agent:
 
-1. First, launch frontend agent to identify data issues:
+1. First, analyze with frontend focus:
 ```yaml
 Task:
-  description: "Analyze frontend data issue"
-  subagent_type: "frontend-issue-fixer"
+  description: "Analyze frontend-backend data issue"
+  subagent_type: "fairmind-integration:Echo (Software Engineer)"
   prompt: |
     Analyze frontend-backend issue: $ARGUMENTS
-    Focus on identifying what data is wrong/missing.
-    Document API calls and expected vs actual data.
+
+    Load both `frontend-react-nextjs` and `backend-nextjs` skills.
+
+    Focus on identifying what data is wrong/missing:
+    1. Use Playwright to inspect network requests
+    2. Document API calls and expected vs actual data
+    3. Identify if issue is in frontend consumption or backend response
 
     Write findings to: ./analyzer-output/[issue]-frontend-analysis.md
 ```
 
-2. Then, launch backend agent with frontend findings:
+2. Then, fix backend if needed:
 ```yaml
 Task:
   description: "Fix backend based on frontend findings"
-  subagent_type: "backend-issue-fixer"
+  subagent_type: "fairmind-integration:Echo (Software Engineer)"
   prompt: |
     Fix backend issue identified by frontend analysis.
+
+    Load `backend-nextjs` skill for patterns.
+
     Read: ./analyzer-output/[issue]-frontend-analysis.md
 
-    Fix data structure/API response issues.
+    Fix data structure/API response issues following skill patterns.
     Write report to: ./analyzer-output/[issue]-backend-fix.md
 ```
 
-3. Finally, re-validate with frontend agent:
+3. Finally, re-validate with frontend:
 ```yaml
 Task:
   description: "Validate frontend after backend fix"
-  subagent_type: "frontend-issue-fixer"
+  subagent_type: "fairmind-integration:Echo (Software Engineer)"
   prompt: |
     Validate the frontend now works after backend fix.
-    Test the original issue scenario.
 
+    Load `frontend-react-nextjs` skill and use Playwright MCP tools.
+
+    Test the original issue scenario.
     Write final report to: ./analyzer-output/[issue]-report-final.md
 ```
 
@@ -165,7 +186,7 @@ Extract:
 ### 2. Evaluate Progress
 
 **If Failed: 0**
-- ✅ Issue resolved!
+- Issue resolved!
 - Mark todos completed
 - Generate success summary
 
@@ -174,7 +195,7 @@ Extract:
 - Update todos with remaining fixes
 
 **If no improvement for 2 iterations**
-- ⚠️ Request manual intervention
+- Request manual intervention
 - Document persistent failures
 - Exit with detailed report
 
@@ -192,6 +213,7 @@ FIX ORCHESTRATION COMPLETE
 ========================
 Issue: [name]
 Type: [fe-fe|fe-be|be-be]
+Skills Used: [list]
 Iterations: [count]
 Status: [RESOLVED|PARTIAL|BLOCKED]
 

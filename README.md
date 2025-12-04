@@ -1,28 +1,61 @@
 # Fairmind Integration Plugin for Claude Code
 
-A comprehensive Claude Code plugin providing team collaboration agents and skills with deep Fairmind platform integration. Enables full traceability from implementation plans to code review with specialized AI agents for every stage of development.
+A comprehensive Claude Code plugin providing team collaboration with role-based agents and technology-specific skills. Features deep Fairmind platform integration with full traceability from implementation plans to code review.
 
 ## Overview
 
-This plugin extends Claude Code with 12 specialized agents and 3 Fairmind-aware skills, creating a complete team collaboration workflow with the Fairmind AI Studio platform. It provides plan adaptation, test-driven development, and systematic code review with full plan→journal→code traceability.
+This plugin extends Claude Code with **6 role-based agents** and **9 technology-specific skills**, creating a complete team collaboration workflow with the Fairmind AI Studio platform. Agents focus on roles (what they do), while skills provide technology expertise (how they do it).
 
 ## Key Features
 
-**🤖 12 Specialized Agents**
-- Development agents with Fairmind context integration
-- Validation agents with requirements verification
-- Orchestration agent (Atlas) for plan adaptation
-- Cross-repository integration support
+**6 Role-Based Agents**
+- **Atlas (Tech Lead)** - Orchestration, plan adaptation, coordination
+- **Echo (Software Engineer)** - All implementation work (frontend, backend, AI)
+- **Tess (QA Engineer)** - Test execution and validation
+- **Echo (Code Reviewer)** - Code quality and standards review
+- **Debug Detective** - Complex debugging scenarios
+- **Shield (Cybersecurity)** - Security analysis and validation
 
-**🎯 3 Fairmind-Aware Skills**
-- `fairmind-context`: Intelligent context gathering from projects, sessions, and work items
-- `fairmind-tdd`: Test-driven development aligned with acceptance criteria
-- `fairmind-code-review`: Three-layer verification (plan→journal→code)
+**9 Technology Skills**
+- `fairmind-context` - Intelligent context gathering from Fairmind platform
+- `fairmind-tdd` - Test-driven development workflow
+- `fairmind-code-review` - Three-layer verification (plan-journal-code)
+- `frontend-react-nextjs` - React, NextJS, TypeScript, Tailwind, Shadcn
+- `backend-nextjs` - NextJS API routes, MongoDB, authentication
+- `backend-python` - FastAPI, Pydantic, async patterns
+- `backend-langchain` - LangChain, LangGraph, RAG patterns
+- `qa-playwright` - Playwright test patterns, selectors, CI integration
+- `ai-ml-systems` - LLM optimization, agent architecture, evaluation
 
-**🔄 Complete Workflow**
-- Atlas (Tech Lead) adapts Fairmind plans for specialized agents
-- Dev agents implement using TDD with journal tracking
-- Code Reviewer verifies against original plans and requirements
+**Complete Workflow**
+- Atlas adapts Fairmind plans for the Software Engineer
+- Echo implements using appropriate skills and TDD with journal tracking
+- Tess validates with Playwright tests
+- Code Reviewer verifies against plans and requirements
+- Shield performs security review
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        AGENTS (Roles)                            │
+├─────────────────────────────────────────────────────────────────┤
+│  Atlas        Echo (SWE)     Tess (QA)    Code Reviewer  Shield │
+│  (Tech Lead)  (implements)   (tests)      (reviews)      (sec)  │
+└──────┬────────────┬────────────┬────────────┬──────────────┬────┘
+       │            │            │            │              │
+       ▼            ▼            ▼            ▼              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                       SKILLS (Capabilities)                      │
+├─────────────────────────────────────────────────────────────────┤
+│  Fairmind Skills:                                                │
+│  • fairmind-context    • fairmind-tdd    • fairmind-code-review │
+│                                                                  │
+│  Technology Skills:                                              │
+│  • frontend-react-nextjs   • backend-nextjs   • backend-python  │
+│  • backend-langchain       • qa-playwright    • ai-ml-systems   │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ## Requirements
 
@@ -66,8 +99,6 @@ Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
 
 ### Option 1: Install from Marketplace (Recommended)
 
-Once published to a Claude Code marketplace:
-
 ```bash
 # Install globally for all projects
 claude plugin install fairmind-integration
@@ -108,138 +139,219 @@ For automatic installation across your team, add to your repository's `.claude/s
 ```
 fairmind-integration/
 ├── .claude-plugin/
-│   └── marketplace.json      # Plugin marketplace metadata
-├── agents/                   # 12 specialized agents
-│   ├── ai-engineer.md
-│   ├── backend-engineer.md
-│   ├── frontend-engineer.md
-│   ├── qa-engineer.md
-│   ├── code-reviewer.md
-│   ├── cybersec-engineer.md
-│   ├── debug-detective.md
-│   ├── backend-issue-fixer.md
-│   ├── frontend-issue-fixer.md
-│   ├── playwright-issue-analyzer.md
-│   ├── pr-diff-documenter.md
-│   └── tech-lead-software-architect.md
-├── fairmind-context/         # Fairmind context gathering skill
+│   └── marketplace.json          # Plugin marketplace metadata
+├── agents/                       # 6 role-based agents
+│   ├── tech-lead.md              # Atlas - orchestration
+│   ├── software-engineer.md      # Echo - all implementation
+│   ├── qa-engineer.md            # Tess - testing
+│   ├── code-reviewer.md          # Echo - code review
+│   ├── debug-detective.md        # Debugging specialist
+│   ├── cybersec-engineer.md      # Shield - security
+│   └── archived/                 # Legacy agents (kept for reference)
+├── fairmind-context/             # Fairmind context skill
 │   └── SKILL.md
-├── fairmind-tdd/             # Fairmind TDD workflow skill
+├── fairmind-tdd/                 # TDD workflow skill
 │   └── SKILL.md
-├── fairmind-code-review/     # Fairmind code review skill
+├── fairmind-code-review/         # Code review skill
 │   └── SKILL.md
-├── commands/                 # Optional slash commands
-├── skills/                   # Skills documentation
-│   └── README.md
+├── frontend-react-nextjs/        # Frontend technology skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── react-patterns.md
+│       ├── nextjs-conventions.md
+│       ├── typescript-guidelines.md
+│       ├── tailwind-shadcn.md
+│       └── zustand-state.md
+├── backend-nextjs/               # NextJS backend skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── api-routes.md
+│       ├── mongodb-patterns.md
+│       ├── authentication.md
+│       └── error-handling.md
+├── backend-python/               # Python backend skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── fastapi-patterns.md
+│       ├── pydantic-models.md
+│       ├── async-patterns.md
+│       └── testing-patterns.md
+├── backend-langchain/            # LangChain/AI skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── chain-patterns.md
+│       ├── agent-patterns.md
+│       ├── rag-patterns.md
+│       ├── prompt-engineering.md
+│       └── memory-patterns.md
+├── qa-playwright/                # Playwright testing skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── test-patterns.md
+│       ├── selectors.md
+│       ├── visual-testing.md
+│       ├── mcp-tools.md
+│       └── ci-integration.md
+├── ai-ml-systems/                # AI/ML systems skill
+│   ├── SKILL.md
+│   └── references/
+│       ├── llm-optimization.md
+│       ├── agent-architecture.md
+│       ├── evaluation-patterns.md
+│       └── cost-optimization.md
+├── commands/                     # Slash commands
+│   ├── fix-issue.md
+│   └── ...
 └── README.md
 ```
 
 ## Agents
 
-### Development Agents (Batch 1)
+### Atlas (Tech Lead)
 
-**AI Engineer** - ML/AI development with Fairmind context
-**Backend Engineer** - Backend development with implementation plans
-**Frontend Engineer** - Frontend development with user story alignment
+**Role:** Orchestration and coordination - NEVER implements code
 
-All development agents:
-- Retrieve implementation plans from Fairmind tasks
-- Follow TDD workflow aligned with acceptance criteria
-- Document progress in `fairmind/journals/{role}/`
-- Use cross-repository Code tools for integrations
+**Responsibilities:**
+- Retrieves implementation plans from Fairmind
+- Adapts plans for Echo (Software Engineer)
+- Specifies which skill(s) to load for each task
+- Monitors progress through journals
+- Coordinates validation with Tess and Code Reviewer
 
-### Validation Agents (Batch 2)
+### Echo (Software Engineer)
 
-**QA Engineer (Tess)** - Testing aligned with Fairmind test expectations
-**Code Reviewer (Echo)** - Three-layer plan→journal→code verification
-**Cybersecurity (Shield)** - Security review against Fairmind requirements
+**Role:** All implementation work
 
-### Utility Agents (Batch 3)
+**Specializes dynamically** by loading appropriate skills:
+- Frontend work: `frontend-react-nextjs`
+- Backend (NextJS): `backend-nextjs`
+- Backend (Python): `backend-python`
+- AI/LLM work: `backend-langchain` + `ai-ml-systems`
 
-**Debug Detective** - Cross-service debugging with Fairmind context
-**Backend/Frontend Issue Fixers** - Targeted fixes with user story context
-**Playwright Issue Analyzer** - Test analysis (no Fairmind integration)
-**PR Diff Documenter** - PR documentation (no Fairmind integration)
+**Workflow:**
+1. Read work package from Atlas
+2. Load required skill(s)
+3. Implement following skill patterns
+4. Document in journal
+5. Mark completion
 
-### Orchestration Agent (Batch 4)
+### Tess (QA Engineer)
 
-**Tech Lead (Atlas)** - The critical orchestrator
+**Role:** Test execution and validation
 
-**Primary Role:** Plan adaptation and agent coordination
-- Retrieves generic Fairmind implementation plans
-- Analyzes agent capabilities vs plan requirements
-- Adapts plans into agent-specific work packages
-- Writes to `fairmind/work_packages/{role}/`
-- Monitors execution and coordinates handoffs
+**Responsibilities:**
+- Execute test plans from work packages
+- Use `qa-playwright` skill for Playwright patterns
+- Validate against acceptance criteria
+- Generate validation reports
 
-**Key Principle:** Atlas translates between Fairmind's project plans and agent-specific capabilities. Never implements code, always adapts plans.
+### Echo (Code Reviewer)
+
+**Role:** Code quality verification
+
+**Three-Layer Verification:**
+1. Plan compliance (plan vs journal)
+2. Requirements compliance (code vs acceptance criteria)
+3. Integration verification (cross-repo contracts)
+
+**Uses skills for context:** Can load technology skills to understand expected patterns.
+
+### Debug Detective
+
+**Role:** Complex debugging scenarios
+
+**Capabilities:**
+- Root cause analysis
+- Cross-service debugging
+- Performance investigation
+
+### Shield (Cybersecurity Expert)
+
+**Role:** Security analysis and validation
+
+**Responsibilities:**
+- Security code review
+- Vulnerability assessment
+- Security architecture review
+- Compliance verification
 
 ## Skills
 
-### fairmind-context
+### Fairmind Integration Skills
 
-**Purpose:** Reusable context gathering for any Fairmind work
+**fairmind-context**
+- Intelligent context gathering from Fairmind platform
+- Used by all other skills as foundation
 
-**Inputs:**
-- `project_id` (optional - can auto-detect)
-- `user_story_id` (optional)
-- `task_id` (optional)
-- `target_project_id` (optional - for cross-project integrations)
+**fairmind-tdd**
+- Test-driven development aligned with acceptance criteria
+- Red-Green-Refactor with journal tracking
 
-**Outputs:** Complete context including project, session, user story, task with implementation plan, requirements, tests, and documentation
+**fairmind-code-review**
+- Three-layer verification system
+- Plan → Journal → Code traceability
 
-**Invoked by:** All other Fairmind skills as foundation
+### Technology Skills
 
-### fairmind-tdd
+Each technology skill includes:
+- `SKILL.md` - Workflow and when to use
+- `references/` - Detailed patterns, examples, best practices
 
-**Purpose:** Test-driven development aligned with Fairmind plans
+**frontend-react-nextjs**
+- Component patterns, hooks, state management
+- NextJS App Router, server components
+- TypeScript, Tailwind CSS, Shadcn UI
 
-**Workflow:**
-1. **Setup:** Invoke `fairmind-context`, get implementation plan and test expectations
-2. **Red:** Write failing test aligned with acceptance criteria
-3. **Green:** Implement minimal code following the plan
-4. **Refactor:** Clean up while maintaining tests
-5. **Documentation:** Update journal with traceability
+**backend-nextjs**
+- API route design and middleware
+- MongoDB patterns and optimization
+- Authentication with NextAuth
 
-**Key Difference:** Tests aligned with Fairmind acceptance criteria, implementation follows plan from `get_task`, journal provides traceability chain.
+**backend-python**
+- FastAPI patterns and best practices
+- Pydantic models and validation
+- Async patterns and testing
 
-### fairmind-code-review
+**backend-langchain**
+- LangChain chains and LCEL
+- LangGraph agents and workflows
+- RAG patterns and prompt engineering
 
-**Purpose:** Systematic code review with full traceability
+**qa-playwright**
+- Test organization and fixtures
+- Selector strategies
+- Visual testing and CI integration
 
-**Three-Layer Verification:**
-1. **Plan Verification:** Compare implementation plan vs journal entries (detect scope creep, missing items)
-2. **Requirements Verification:** Check code against acceptance criteria, functional/technical requirements, test coverage
-3. **Integration Verification:** Verify API contracts in other repositories (if applicable)
-
-**Output:** Structured report with plan compliance, requirements compliance, integration checks, and recommendations
+**ai-ml-systems**
+- LLM optimization and model selection
+- Multi-agent architecture patterns
+- Evaluation and cost optimization
 
 ## Team Workflow Example
 
 ```
-1. Tech Lead (Atlas)
+1. Atlas (Tech Lead)
    └─ get_task("TASK-123") → Retrieve Fairmind implementation plan
    └─ Analyze: "This needs React frontend + Node.js API"
-   └─ Adapt plan for Frontend Engineer and Backend Engineer
-   └─ Write to fairmind/work_packages/frontend/ and fairmind/work_packages/backend/
+   └─ Create work package specifying skills to load
+   └─ Write to fairmind/work_packages/frontend/TASK-123_workpackage.md
 
-2. Frontend Engineer
-   └─ Read work_packages/frontend/TASK-123.md
-   └─ Use fairmind-context skill → Get user story, acceptance criteria
+2. Echo (Software Engineer)
+   └─ Read work_packages/frontend/TASK-123_workpackage.md
+   └─ Load `frontend-react-nextjs` skill
    └─ Use fairmind-tdd skill → Implement with TDD
-   └─ Update fairmind/journals/frontend/2025-10-28-TASK-123.md
+   └─ Update fairmind/journals/TASK-123_echo_journal.md
+   └─ Create completion flag
 
-3. Backend Engineer
-   └─ Read work_packages/backend/TASK-123.md
-   └─ Use fairmind-context skill → Get API requirements
-   └─ Use fairmind-tdd skill → Implement endpoints
-   └─ Update fairmind/journals/backend/2025-10-28-TASK-123.md
+3. Tess (QA Engineer)
+   └─ Load `qa-playwright` skill
+   └─ Execute test scenarios
+   └─ Create validation report
 
-4. Code Reviewer (Echo)
+4. Echo (Code Reviewer)
    └─ Use fairmind-code-review skill
-   └─ Verify: Plan → Journals → Code traceability
-   └─ Check acceptance criteria met
-   └─ Validate cross-repo API contract (if integration)
+   └─ Load relevant technology skill for context
+   └─ Verify: Plan → Journal → Code traceability
    └─ Provide structured feedback
 ```
 
@@ -249,30 +361,26 @@ All development agents:
 
 ```bash
 # Atlas retrieves and adapts the plan
-@tech-lead-software-architect retrieve task TASK-456 and create work packages
+@tech-lead retrieve task TASK-456 and create work packages
 
-# Dev agent implements with TDD
-@frontend-engineer implement the work package for TASK-456
+# Echo implements with appropriate skill
+@software-engineer implement the work package for TASK-456
+
+# Tess validates
+@qa-engineer run tests for TASK-456
 
 # Review the implementation
 @code-reviewer review TASK-456 implementation
 ```
 
-### Cross-Repository Integration
+### Using the Fix Issue Command
 
 ```bash
-# Investigate API contract in another service
-@backend-engineer check the payment-service API for checkout endpoint
+# Automatically classify and fix an issue
+/fix-issue login-bug
 
-# Debug cross-service issue
-@debug-detective investigate why auth-service calls are failing
-```
-
-### Security Review
-
-```bash
-# Review against Fairmind security requirements
-@cybersec-engineer review authentication implementation for security requirements
+# Specify issue type explicitly
+/fix-issue login-bug --type fe-be
 ```
 
 ## Directory Structure Created by Workflow
@@ -283,11 +391,11 @@ your-project/
 │   ├── work_packages/        # Atlas-adapted plans for agents
 │   │   ├── frontend/
 │   │   ├── backend/
-│   │   └── ai/
-│   └── journals/             # Agent progress tracking
-│       ├── frontend/
-│       ├── backend/
-│       └── ai/
+│   │   ├── ai/
+│   │   ├── qa/
+│   │   └── fixes/
+│   ├── journals/             # Agent progress tracking
+│   └── validation_results/   # Test and review reports
 └── [your code]
 ```
 
@@ -328,74 +436,27 @@ For consistent team setup, commit `.claude/settings.json` with:
 }
 ```
 
-**Note:** Use environment variable `FAIRMIND_TOKEN` to avoid committing tokens to version control. Team members should set their own token:
-
-```bash
-export FAIRMIND_TOKEN="your-token-here"
-```
-
 ## Best Practices
 
-1. **Always start with Atlas** for new Fairmind tasks - let it adapt the plan
-2. **Use fairmind-context** in all development work - ensures full context
+1. **Always start with Atlas** for new Fairmind tasks - let it adapt the plan and specify skills
+2. **Load skills before implementation** - skills provide patterns and examples
 3. **Follow fairmind-tdd** for implementation - maintains traceability
 4. **Update journals regularly** - enables meaningful code review
-5. **Use Code tools only for cross-repo** - use local file tools for current repository
-
-## Troubleshooting
-
-### Plugin Not Loading
-
-```bash
-# Verify plugin installation
-claude plugin list
-
-# Check plugin structure
-ls -la ~/.claude/plugins/fairmind-integration/.claude-plugin/
-```
-
-### Fairmind MCP Server Issues
-
-```bash
-# Test MCP server connection
-claude mcp test Fairmind
-
-# Check server logs
-tail -f ~/.claude/logs/mcp-Fairmind.log
-```
-
-### Missing Context
-
-If skills can't find Fairmind context:
-1. Verify Fairmind MCP server is configured
-2. Check you're in a project with Fairmind integration
-3. Ensure `project_id` or `task_id` is available
-
-## Development
-
-### Adding Custom Agents
-
-1. Create new agent file in `agents/`
-2. Follow existing agent format
-3. Agents are automatically discovered by Claude Code
-4. Test with Claude Code
-
-### Creating Additional Skills
-
-1. Create skill directory in root (e.g., `fairmind-newskill/`)
-2. Add `SKILL.md` file inside the directory following Claude Code format
-3. Follow Fairmind skill naming convention (`fairmind-*`)
-4. Use `fairmind-context` as foundation
-5. Update marketplace.json skills array and README
+5. **Use skill references** - each skill has detailed reference files
 
 ## Version History
 
+**2.0.0** (2024-12-04)
+- Reorganized from 12 function-specific agents to 6 role-based agents
+- Added 6 new technology-specific skills with reference files
+- Consolidated frontend, backend, AI engineers into single Software Engineer
+- Skills now provide technology expertise, agents focus on roles
+- Updated fix-issue command to use new structure
+
 **1.0.0** (2025-10-28)
-- Initial release
-- 12 specialized agents with Fairmind integration
+- Initial release with 12 specialized agents
 - 3 Fairmind-aware skills
 - Complete plan→journal→code workflow
-- Cross-repository integration support
 
 ## License
 
