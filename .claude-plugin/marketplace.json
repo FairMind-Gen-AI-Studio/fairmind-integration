@@ -6,18 +6,24 @@
   },
   "metadata": {
     "description": "Official Fairmind Integration Plugin marketplace for Claude Code",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "fairmind-integration",
-      "description": "Team collaboration agents and skills with Fairmind platform integration. Includes 12 specialized agents, 3 Fairmind-aware skills for TDD and code review, and full traceability from implementation plans to code.",
+      "description": "Team collaboration with 6 role-based agents and 9 technology-specific skills. Agents: Atlas (Tech Lead), Echo (Software Engineer), Tess (QA Engineer), Code Reviewer, Debug Detective, Shield (Cybersecurity). Skills cover frontend, backend, Python, LangChain, Playwright, and AI systems.",
       "source": "./",
       "strict": false,
       "skills": [
         "./fairmind-context",
         "./fairmind-tdd",
-        "./fairmind-code-review"
+        "./fairmind-code-review",
+        "./frontend-react-nextjs",
+        "./backend-nextjs",
+        "./backend-python",
+        "./backend-langchain",
+        "./qa-playwright",
+        "./ai-ml-systems"
       ]
     }
   ]
