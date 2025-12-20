@@ -13,18 +13,7 @@
       "name": "fairmind-integration",
       "description": "Team collaboration with 6 role-based agents and 9 technology-specific skills. Agents: Atlas (Tech Lead), Echo (Software Engineer), Tess (QA Engineer), Code Reviewer, Debug Detective, Shield (Cybersecurity). Skills cover frontend, backend, Python, LangChain, Playwright, and AI systems.",
       "source": "./",
-      "strict": false,
-      "skills": [
-        "./fairmind-context",
-        "./fairmind-tdd",
-        "./fairmind-code-review",
-        "./frontend-react-nextjs",
-        "./backend-nextjs",
-        "./backend-python",
-        "./backend-langchain",
-        "./qa-playwright",
-        "./ai-ml-systems"
-      ]
+      "strict": false
     }
   ]
 }

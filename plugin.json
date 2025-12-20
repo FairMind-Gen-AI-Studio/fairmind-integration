@@ -8,5 +8,8 @@
   },
   "repository": "https://github.com/FairMind-Gen-AI-Studio/fairmind-integration",
   "license": "MIT",
-  "keywords": ["agents", "skills", "fairmind", "collaboration", "tdd", "code-review"]
+  "keywords": ["agents", "skills", "fairmind", "collaboration", "tdd", "code-review"],
+  "agents": "./agents/",
+  "skills": "./skills/",
+  "commands": "./commands/"
 }
