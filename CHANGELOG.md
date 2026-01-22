@@ -5,6 +5,38 @@ All notable changes to the Fairmind Integration Plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-01-22
+
+### Changed
+- **Major refactor**: Reorganized from 12 function-specific agents to 6 role-based agents
+  - Atlas (Tech Lead/Software Architect)
+  - Echo (Software Engineer) - dynamically specializes based on task
+  - Tess (QA Engineer)
+  - Code Reviewer
+  - Debug Detective
+  - Shield (Cybersecurity Expert)
+
+### Added
+
+#### Skills (6 new technology-specific)
+- `frontend-react-nextjs` - React, NextJS, TypeScript, Tailwind, Shadcn UI
+- `backend-nextjs` - NextJS API routes, MongoDB, server-side logic
+- `backend-python` - FastAPI, Pydantic, async patterns
+- `backend-langchain` - LangChain, LangGraph, RAG systems
+- `qa-playwright` - Playwright E2E testing, visual testing, MCP tools
+- `ai-ml-systems` - LLM optimization, multi-agent systems, AI evaluation
+
+#### Features
+- `readiness-report` skill for repository assessment
+- `plugin.json` for Claude Code plugin system compatibility
+- All agents updated to use Claude Sonnet 4.5
+
+### Fixed
+- Skill directory structure corrected for Claude Code plugin format
+- Skills moved to root directory for proper plugin loading
+
+---
+
 ## [1.0.0] - 2025-10-28
 
 ### Added
