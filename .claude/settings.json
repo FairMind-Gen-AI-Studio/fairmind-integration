@@ -1,0 +1,5 @@
+{
+  "enabledPlugins": {
+    "fairmind-integration@fairmind-marketplace": true
+  }
+}
