@@ -52,9 +52,21 @@ This script checks for:
 - Test infrastructure (test directories, coverage configs)
 - Security configurations (CODEOWNERS, .gitignore, secrets management)
 
-### Step 2: Generate Report
+### Step 2: Generate Executive Summary (HTML reports only)
 
-After analysis, generate the formatted report:
+For HTML reports, read the analysis JSON and generate a 2-3 sentence executive summary:
+
+**Summary should include:**
+- Current maturity level achieved
+- Key strength area (top pillar)
+- Priority action for improvement
+
+**Example summary format:**
+> This repository achieves L2 (Documented) maturity with strong Documentation coverage at 85%. To reach L3, prioritize adding integration tests and test coverage thresholds.
+
+### Step 3: Generate Report
+
+Generate the formatted report:
 
 ```bash
 python "$SCRIPTS_DIR/generate_report.py" --analysis-file /tmp/readiness_analysis.json
@@ -74,11 +86,12 @@ python "$SCRIPTS_DIR/generate_report.py" \
 | Markdown | `--format markdown` (default) | Mermaid diagrams inline | GitHub, GitLab, VS Code |
 | HTML | `--format html` | Self-contained HTML with FairMind branding | Browser viewing, sharing |
 
-Generate HTML report:
+Generate HTML report with executive summary:
 ```bash
 python "$SCRIPTS_DIR/generate_report.py" \
   --analysis-file /tmp/readiness_analysis.json \
   --format html \
+  --summary "This repository achieves L2 maturity with strong documentation. Priority: add integration tests to reach L3." \
   --output report.html
 ```
 
@@ -91,7 +104,7 @@ python "$SCRIPTS_DIR/generate_report.py" \
   --no-diagrams
 ```
 
-### Step 3: Present Results
+### Step 4: Present Results
 
 The report includes:
 1. **Overall Score**: Pass rate percentage and maturity level achieved
