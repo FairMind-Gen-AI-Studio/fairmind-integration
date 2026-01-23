@@ -124,20 +124,24 @@ def generate_markdown_report(data: dict, include_diagrams: bool = True) -> str:
             lines.append(f"> **Warning**: Folders without manifest files: {', '.join(undetected_folders)}")
             lines.append("")
 
-    # Level Progress
+    # Level Progress (gated progression - must pass 80% of previous level to unlock)
     lines.append("## Level Progress")
     lines.append("")
     lines.append("| Level | Score | Status |")
     lines.append("|-------|-------|--------|")
     for level in range(1, 6):
         score = level_scores.get(str(level), level_scores.get(level, 0))
-        if achieved > 0 and level <= achieved:
-            status = "Achieved"
+        prev_score = level_scores.get(str(level - 1), level_scores.get(level - 1, 100)) if level > 1 else 100
+        is_unlocked = level == 1 or prev_score >= 80
+
+        if not is_unlocked:
+            lines.append(f"| L{level} | 🔒 | Locked (need 80% at L{level-1}) |")
+        elif achieved > 0 and level <= achieved:
+            lines.append(f"| L{level} | {score:.0f}% | ✓ Achieved |")
         elif score >= 80:
-            status = "Passed"
+            lines.append(f"| L{level} | {score:.0f}% | Passed |")
         else:
-            status = f"{100-score:.0f}% to go"
-        lines.append(f"| L{level} | {score:.0f}% | {status} |")
+            lines.append(f"| L{level} | {score:.0f}% | {80-score:.0f}% to go |")
     lines.append("")
 
     # Visual Summary (Mermaid diagrams)

@@ -21,29 +21,29 @@ FAIRMIND_COSMIC_GREEN = "#16B27A"
 # Level definitions for the maturity model
 LEVEL_DEFINITIONS = {
     1: {
-        "name": "Functional",
-        "description": "Code runs, but requires manual setup and lacks automated validation.",
-        "examples": "README, linter, type checker, unit tests"
+        "name": "Manual",
+        "description": "Basic version control and code quality tooling. Agents can read code and make simple edits, but all changes require manual verification.",
+        "examples": "README, linter, type checker, unit tests, pinned deps"
     },
     2: {
-        "name": "Documented",
-        "description": "Basic documentation and process exist. Workflows are written down and some automation is in place.",
-        "examples": "AGENTS.md, devcontainer, pre-commit hooks, branch protection"
+        "name": "Scaffolded",
+        "description": "CI/CD automation and basic documentation. Agents can handle simple, well-defined tasks with automated feedback.",
+        "examples": "AGENTS.md, devcontainer, pre-commit hooks, branch protection, CI workflow"
     },
     3: {
-        "name": "Standardized",
-        "description": "Clear processes are defined, documented, and enforced through automation.",
-        "examples": "Integration tests, secret scanning, distributed tracing, metrics"
+        "name": "Collaborative",
+        "description": "Production-ready for agent collaboration. Agents can perform routine maintenance and medium-complexity tasks.",
+        "examples": "Integration tests, secret scanning, distributed tracing, metrics, error tracking"
     },
     4: {
-        "name": "Optimized",
-        "description": "Fast feedback loops and data-driven improvement. Systems designed for productivity.",
-        "examples": "Fast CI feedback, regular deployment, flaky test detection"
+        "name": "Automated",
+        "description": "Advanced tooling and comprehensive automation. Agents can implement complex features with minimal oversight.",
+        "examples": "Fast CI feedback (<10min), regular deployment, flaky test detection, feature flags"
     },
     5: {
         "name": "Autonomous",
-        "description": "Systems are self-improving with sophisticated orchestration.",
-        "examples": "Self-improving systems, parallelized execution"
+        "description": "Full autonomous development capability. Agents can handle end-to-end development with self-improving systems.",
+        "examples": "Self-healing CI, parallelized execution, automated dependency updates"
     },
 }
 
@@ -113,20 +113,45 @@ def generate_html_report(data: dict, summary: str = None) -> str:
     level_scores = data["level_scores"]
     detected_apps = data.get("detected_apps", [])
     undetected_folders = data.get("undetected_app_folders", [])
+    git_branch = data.get("git_branch", "unknown")
+    generated_at = data.get("generated_at", "")
+    
+    # Format timestamp for display
+    if generated_at:
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(generated_at)
+            generated_at_display = dt.strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            generated_at_display = generated_at
+    else:
+        generated_at_display = "—"
 
-    # Build level progress HTML
+    # Build level progress HTML with gated progression
+    # A level is unlocked only if the previous level has >= 80%
     level_bars = []
     for level in range(1, 6):
         score = level_scores.get(str(level), level_scores.get(level, 0))
+        prev_score = level_scores.get(str(level - 1), level_scores.get(level - 1, 100)) if level > 1 else 100
+        is_unlocked = level == 1 or prev_score >= 80
         is_achieved = achieved > 0 and level <= achieved
-        level_class = "achieved" if is_achieved else ("passed" if score >= 80 else "")
+        
+        if not is_unlocked:
+            level_class = "locked"
+            display_score = "🔒"
+            fill_width = 0
+        else:
+            level_class = "achieved" if is_achieved else ("passed" if score >= 80 else "")
+            display_score = f"{score:.0f}%"
+            fill_width = score
+        
         level_bars.append(f'''
             <div class="level-item {level_class}">
                 <div class="level-label">L{level}</div>
                 <div class="level-bar">
-                    <div class="level-fill" style="width: {score}%"></div>
+                    <div class="level-fill" style="width: {fill_width}%"></div>
                 </div>
-                <div class="level-score">{score:.0f}%</div>
+                <div class="level-score">{display_score}</div>
             </div>
         ''')
 
@@ -163,23 +188,36 @@ def generate_html_report(data: dict, summary: str = None) -> str:
         </section>
         '''
 
-    # Build level descriptions HTML
+    # Build level descriptions HTML with gated progression
     level_descriptions_html = ""
     level_cards = []
     for level in range(1, 6):
         level_def = LEVEL_DEFINITIONS[level]
         score = level_scores.get(str(level), level_scores.get(level, 0))
+        prev_score = level_scores.get(str(level - 1), level_scores.get(level - 1, 100)) if level > 1 else 100
+        is_unlocked = level == 1 or prev_score >= 80
         is_achieved = achieved > 0 and level <= achieved
-        level_class = "achieved" if is_achieved else ""
+        
+        if not is_unlocked:
+            level_class = "locked"
+            display_score = "🔒"
+            card_desc = level_def["description"]
+            card_examples = level_def["examples"]
+        else:
+            level_class = "achieved" if is_achieved else ""
+            display_score = f"{score:.0f}%"
+            card_desc = level_def["description"]
+            card_examples = level_def["examples"]
+        
         level_cards.append(f'''
             <div class="level-card {level_class}">
                 <div class="level-card-header">
                     <span class="level-card-number">L{level}</span>
                     <span class="level-card-name">{level_def["name"]}</span>
                 </div>
-                <p class="level-card-desc">{level_def["description"]}</p>
-                <div class="level-card-examples">{level_def["examples"]}</div>
-                <div class="level-card-score">{score:.0f}%</div>
+                <p class="level-card-desc">{card_desc}</p>
+                <div class="level-card-examples">{card_examples}</div>
+                <div class="level-card-score">{display_score}</div>
             </div>
         ''')
     level_descriptions_html = f'''
@@ -477,6 +515,26 @@ def generate_html_report(data: dict, summary: str = None) -> str:
             border-color: var(--cosmic-green);
             box-shadow: 0 0 12px rgba(22, 178, 122, 0.2);
         }}
+        .level-card.locked {{
+            opacity: 0.5;
+            border-color: var(--border);
+            background: repeating-linear-gradient(
+                45deg,
+                var(--card),
+                var(--card) 10px,
+                rgba(0,0,0,0.1) 10px,
+                rgba(0,0,0,0.1) 20px
+            );
+        }}
+        .level-card.locked .level-card-score {{
+            font-size: 1.5rem;
+        }}
+        .level-item.locked {{
+            opacity: 0.5;
+        }}
+        .level-item.locked .level-bar {{
+            background: var(--border);
+        }}
         .level-card-header {{
             display: flex;
             align-items: center;
@@ -668,22 +726,23 @@ def generate_html_report(data: dict, summary: str = None) -> str:
             <div class="header-meta">
                 <span>{', '.join(languages)}</span>
                 <span>{repo_type}</span>
+                <span>📌 {git_branch}</span>
+                <span>🕐 {generated_at_display}</span>
             </div>
         </div>
     </header>
 
     <div class="container">
-        {executive_summary_html}
-
         <section class="hero">
             <h1 class="hero-title">{_escape_html(repo_name)}</h1>
+            <p class="hero-meta">Branch: <strong>{git_branch}</strong> · Generated: <strong>{generated_at_display}</strong></p>
             <div class="hero-stats">
                 <div class="stat">
                     <div class="stat-value">{pass_rate:.0f}%</div>
                     <div class="stat-label">Pass Rate</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">L{achieved if achieved > 0 else '—'}</div>
+                    <div class="stat-value">L{achieved}</div>
                     <div class="stat-label">Achieved Level</div>
                 </div>
                 <div class="stat">
@@ -695,6 +754,8 @@ def generate_html_report(data: dict, summary: str = None) -> str:
                 {''.join(level_bars)}
             </div>
         </section>
+
+        {executive_summary_html}
 
         {level_descriptions_html}
 

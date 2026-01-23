@@ -66,6 +66,8 @@ def level_progress_mermaid(level_scores: dict, achieved_level: int = 0) -> str:
     """
     Generate Mermaid xychart for level progression (L1-L5).
 
+    Uses gated progression: levels are locked until previous level >= 80%.
+
     Args:
         level_scores: Dict of level -> score percentage
         achieved_level: Currently achieved level
@@ -78,9 +80,19 @@ def level_progress_mermaid(level_scores: dict, achieved_level: int = 0) -> str:
 
     for level in range(1, 6):
         score = level_scores.get(str(level), level_scores.get(level, 0))
-        marker = " *" if level <= achieved_level else ""
+        prev_score = level_scores.get(str(level - 1), level_scores.get(level - 1, 100)) if level > 1 else 100
+        is_unlocked = level == 1 or prev_score >= 80
+
+        if level <= achieved_level:
+            marker = " ✓"
+        elif not is_unlocked:
+            marker = " 🔒"
+        else:
+            marker = ""
+
         levels.append(f'"L{level}{marker}"')
-        scores.append(str(int(score)))
+        # Show 0 for locked levels in the chart
+        scores.append(str(int(score if is_unlocked else 0)))
 
     x_axis = ", ".join(levels)
     y_values = ", ".join(scores)

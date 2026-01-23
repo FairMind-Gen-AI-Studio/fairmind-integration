@@ -15,6 +15,7 @@ import json
 import os
 import re
 import subprocess
+from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Optional
@@ -1602,10 +1603,23 @@ def main():
     analyzer = RepoAnalyzer(args.repo_path)
     result = analyzer.analyze()
 
+    # Get current git branch
+    try:
+        git_branch = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=args.repo_path,
+            capture_output=True,
+            text=True
+        ).stdout.strip() or "unknown"
+    except Exception:
+        git_branch = "unknown"
+
     output = {
         "repo_path": result.repo_path,
         "repo_name": result.repo_name,
         "repo_type": result.repo_type,
+        "git_branch": git_branch,
+        "generated_at": datetime.now().isoformat(),
         "languages": result.languages,
         "pass_rate": result.pass_rate,
         "total_passed": result.total_passed,
