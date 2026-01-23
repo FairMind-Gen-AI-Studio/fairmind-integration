@@ -2,16 +2,21 @@
 """
 Report Generator for Agent Readiness
 
-Generates formatted markdown reports from analysis JSON.
+Generates formatted reports from analysis JSON.
+Supports Markdown (with Mermaid diagrams) and self-contained HTML.
 
 Usage:
     python generate_report.py --analysis-file /tmp/readiness_analysis.json
     python generate_report.py --analysis-file /tmp/readiness_analysis.json --format markdown
+    python generate_report.py --analysis-file /tmp/readiness_analysis.json --format html
 """
 
 import argparse
 import json
 from pathlib import Path
+
+from diagrams import generate_visual_summary_mermaid
+from html_report import generate_html_report
 
 
 def format_level_bar(level_scores: dict, achieved: int) -> str:
@@ -80,7 +85,7 @@ def get_top_opportunities(data: dict, n: int = 5) -> list[tuple[str, str, str]]:
     return [(o[0], o[2], o[3]) for o in opportunities[:n]]
 
 
-def generate_markdown_report(data: dict) -> str:
+def generate_markdown_report(data: dict, include_diagrams: bool = True) -> str:
     """Generate a full markdown report from analysis data."""
     repo_name = data["repo_name"]
     pass_rate = data["pass_rate"]
@@ -105,21 +110,44 @@ def generate_markdown_report(data: dict) -> str:
         lines.append(f"**Achieved Level**: **Not yet L1** (need 80% at L1)")
     lines.append("")
 
-    # Level Progress
+    # Monorepo app detection info
+    detected_apps = data.get("detected_apps", [])
+    undetected_folders = data.get("undetected_app_folders", [])
+    if repo_type == "monorepo" and detected_apps:
+        lines.append("### Detected Applications")
+        lines.append("")
+        for app in detected_apps:
+            app_langs = ", ".join(app.get("languages", ["Unknown"]))
+            lines.append(f"- **{app['name']}**: {app_langs}")
+        lines.append("")
+        if undetected_folders:
+            lines.append(f"> **Warning**: Folders without manifest files: {', '.join(undetected_folders)}")
+            lines.append("")
+
+    # Level Progress (gated progression - must pass 80% of previous level to unlock)
     lines.append("## Level Progress")
     lines.append("")
     lines.append("| Level | Score | Status |")
     lines.append("|-------|-------|--------|")
     for level in range(1, 6):
         score = level_scores.get(str(level), level_scores.get(level, 0))
-        if achieved > 0 and level <= achieved:
-            status = "Achieved"
+        prev_score = level_scores.get(str(level - 1), level_scores.get(level - 1, 100)) if level > 1 else 100
+        is_unlocked = level == 1 or prev_score >= 80
+
+        if not is_unlocked:
+            lines.append(f"| L{level} | 🔒 | Locked (need 80% at L{level-1}) |")
+        elif achieved > 0 and level <= achieved:
+            lines.append(f"| L{level} | {score:.0f}% | ✓ Achieved |")
         elif score >= 80:
-            status = "Passed"
+            lines.append(f"| L{level} | {score:.0f}% | Passed |")
         else:
-            status = f"{100-score:.0f}% to go"
-        lines.append(f"| L{level} | {score:.0f}% | {status} |")
+            lines.append(f"| L{level} | {score:.0f}% | {80-score:.0f}% to go |")
     lines.append("")
+
+    # Visual Summary (Mermaid diagrams)
+    if include_diagrams:
+        lines.append(generate_visual_summary_mermaid(data))
+        lines.append("")
 
     # Summary
     lines.append("## Summary")
@@ -176,7 +204,21 @@ def generate_markdown_report(data: dict) -> str:
             crit_id = criterion["id"]
             score = criterion["score"]
             reason = criterion["reason"]
-            lines.append(f"| {icon} | `{crit_id}` | {score} | {reason} |")
+            scope = criterion.get("scope", "repo")
+            app_results = criterion.get("app_results", {})
+
+            # Add scope indicator and app breakdown for app-scoped criteria
+            if scope == "app" and app_results:
+                failing_apps = [name for name, passed in app_results.items() if not passed]
+                # Clean reason (remove existing failing list if present)
+                clean_reason = reason.split(" (failing:")[0]
+                if failing_apps:
+                    app_detail = f" *(failing: {', '.join(failing_apps)})*"
+                else:
+                    app_detail = " *(all apps pass)*"
+                lines.append(f"| {icon} | `{crit_id}` | {score} | {clean_reason}{app_detail} |")
+            else:
+                lines.append(f"| {icon} | `{crit_id}` | {score} | {reason} |")
 
         lines.append("")
 
@@ -210,40 +252,6 @@ def generate_markdown_report(data: dict) -> str:
     return "\n".join(lines)
 
 
-def generate_brief_report(data: dict) -> str:
-    """Generate a brief summary report."""
-    repo_name = data["repo_name"]
-    pass_rate = data["pass_rate"]
-    achieved = data["achieved_level"]
-    total_passed = data["total_passed"]
-    total = data["total_criteria"]
-
-    lines = []
-    lines.append(f"## Agent Readiness: {repo_name}")
-    lines.append("")
-    level_str = f"Level {achieved}" if achieved > 0 else "Not yet L1"
-    lines.append(f"**{level_str}** | {pass_rate}% ({total_passed}/{total})")
-    lines.append("")
-
-    # Quick level summary
-    for level in range(1, 6):
-        score = data["level_scores"].get(str(level), data["level_scores"].get(level, 0))
-        bar = "█" * int(score / 10) + "░" * (10 - int(score / 10))
-        check = "[x]" if achieved > 0 and level <= achieved else "[ ]"
-        lines.append(f"L{level} {check} [{bar}] {score:.0f}%")
-
-    lines.append("")
-
-    # Top opportunities
-    opps = get_top_opportunities(data, 3)
-    if opps:
-        lines.append("**Quick Wins:**")
-        for crit_id, reason, _ in opps:
-            lines.append(f"- {crit_id}: {reason}")
-
-    return "\n".join(lines)
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Generate Agent Readiness report from analysis"
@@ -259,9 +267,18 @@ def main():
     )
     parser.add_argument(
         "--format", "-f",
-        choices=["markdown", "brief", "json"],
+        choices=["markdown", "html"],
         default="markdown",
-        help="Output format"
+        help="Output format (markdown with Mermaid diagrams, or self-contained HTML)"
+    )
+    parser.add_argument(
+        "--no-diagrams",
+        action="store_true",
+        help="Disable inline Mermaid diagrams in markdown report"
+    )
+    parser.add_argument(
+        "--summary", "-s",
+        help="Executive summary text to include in HTML report (typically generated by agent)"
     )
 
     args = parser.parse_args()
@@ -277,11 +294,9 @@ def main():
 
     # Generate report
     if args.format == "markdown":
-        report = generate_markdown_report(data)
-    elif args.format == "brief":
-        report = generate_brief_report(data)
-    else:  # json
-        report = json.dumps(data, indent=2)
+        report = generate_markdown_report(data, include_diagrams=not args.no_diagrams)
+    else:  # html
+        report = generate_html_report(data, summary=args.summary)
 
     # Output
     if args.output:

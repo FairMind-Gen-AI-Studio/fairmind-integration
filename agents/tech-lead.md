@@ -44,6 +44,38 @@ This evaluates the repository's readiness for AI-assisted development across 81 
 | L3 | Standardized | Standard automation workflows apply, agents can work independently |
 | L4+ | Measured/Optimized | Can leverage advanced patterns, high agent autonomy |
 
+#### Report Format Options
+
+When generating readiness reports, **ask the user** which format they prefer:
+
+| Format | Command | Best For |
+|--------|---------|----------|
+| Markdown + Diagrams | `--format markdown` (default) | GitHub/GitLab viewing, VS Code with Mermaid extension |
+| ASCII Charts | `--format brief` | Terminal viewing, quick overview |
+| JSON | `--format json` | Programmatic access, integrations |
+| SVG Export | `--export-charts ./charts` | Presentations, PDF export |
+
+**Generate report command:**
+```bash
+# Locate plugin scripts
+PLUGIN_DIR=$(find ~/.claude/plugins/cache/fairmind-marketplace/fairmind-integration -maxdepth 1 \( -type d -o -type l \) 2>/dev/null | tail -1)
+SCRIPTS_DIR="$PLUGIN_DIR/skills/readiness-report/scripts"
+
+# Run analysis and generate report
+python "$SCRIPTS_DIR/analyze_repo.py" --repo-path .
+python "$SCRIPTS_DIR/generate_report.py" \
+  --analysis-file /tmp/readiness_analysis.json \
+  --output fairmind/validation_results/readiness_report.md \
+  --format markdown  # or brief/json, ask user preference
+```
+
+**For presentations or PDF export**, also generate SVG charts:
+```bash
+python "$SCRIPTS_DIR/generate_report.py" \
+  --analysis-file /tmp/readiness_analysis.json \
+  --export-charts fairmind/validation_results/charts
+```
+
 **Use findings to:**
 - Adjust work package detail level based on repo maturity
 - Identify missing infrastructure (tests, CI, docs) as prerequisite setup tasks
