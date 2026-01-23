@@ -13,15 +13,15 @@ This document defines the five-tier progression system for repository maturity, 
 
 | Level | Name | Criteria | Agent Capability |
 |-------|------|----------|------------------|
-| L1 | Initial | 10 | Manual assistance only |
-| L2 | Managed | 21 | Simple, well-defined tasks |
-| L3 | Standardized | 26 | Routine maintenance |
-| L4 | Measured | 16 | Complex features |
-| L5 | Optimized | 7 | End-to-end development |
+| L1 | Manual | 10 | Manual assistance only |
+| L2 | Scaffolded | 21 | Simple, well-defined tasks |
+| L3 | Collaborative | 26 | Routine maintenance |
+| L4 | Automated | 16 | Complex features |
+| L5 | Autonomous | 7 | End-to-end development |
 
 ---
 
-## Level 1: Initial
+## Level 1: Manual
 
 **Focus**: Basic version control and code quality tooling
 
@@ -50,7 +50,7 @@ At L1, agents can:
 
 ---
 
-## Level 2: Managed
+## Level 2: Scaffolded
 
 **Focus**: CI/CD automation and basic documentation
 
@@ -92,7 +92,7 @@ At L2, agents can:
 
 ---
 
-## Level 3: Standardized
+## Level 3: Collaborative
 
 **Focus**: Production-ready automation
 
@@ -140,7 +140,7 @@ At L3, agents can:
 
 ---
 
-## Level 4: Measured
+## Level 4: Automated
 
 **Focus**: Advanced tooling and comprehensive automation
 
@@ -179,7 +179,7 @@ At L4, agents can:
 
 ---
 
-## Level 5: Optimized
+## Level 5: Autonomous
 
 **Focus**: Full autonomous development capability
 
