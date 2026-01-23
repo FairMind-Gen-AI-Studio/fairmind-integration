@@ -27,13 +27,20 @@ Run `/readiness-report` to evaluate the current repository.
 
 ### Step 1: Run Repository Analysis
 
-Execute the analysis script from the skill's scripts directory:
+First, locate the plugin scripts directory:
 
 ```bash
-python ~/.claude/skills/readiness-report/scripts/analyze_repo.py --repo-path .
+PLUGIN_DIR=$(find ~/.claude/plugins/cache/fairmind-marketplace/fairmind-integration -maxdepth 1 \( -type d -o -type l \) 2>/dev/null | tail -1)
+SCRIPTS_DIR="$PLUGIN_DIR/skills/readiness-report/scripts"
 ```
 
-Or if running from this repo:
+Then execute the analysis:
+
+```bash
+python "$SCRIPTS_DIR/analyze_repo.py" --repo-path .
+```
+
+Or if running from the fairmind-integration repo directly:
 ```bash
 python skills/readiness-report/scripts/analyze_repo.py --repo-path /path/to/target/repo
 ```
@@ -50,24 +57,53 @@ This script checks for:
 After analysis, generate the formatted report:
 
 ```bash
-python skills/readiness-report/scripts/generate_report.py --analysis-file /tmp/readiness_analysis.json
+python "$SCRIPTS_DIR/generate_report.py" --analysis-file /tmp/readiness_analysis.json
 ```
 
 **For FairMind integration**, save to validation results:
 ```bash
-python skills/readiness-report/scripts/generate_report.py \
+python "$SCRIPTS_DIR/generate_report.py" \
   --analysis-file /tmp/readiness_analysis.json \
   --output fairmind/validation_results/readiness_report.md
+```
+
+#### Report Format Options
+
+| Format | Flag | Output | Best For |
+|--------|------|--------|----------|
+| Markdown | `--format markdown` (default) | Mermaid diagrams inline | GitHub, GitLab, VS Code |
+| HTML | `--format html` | Self-contained HTML with FairMind branding | Browser viewing, sharing |
+
+Generate HTML report:
+```bash
+python "$SCRIPTS_DIR/generate_report.py" \
+  --analysis-file /tmp/readiness_analysis.json \
+  --format html \
+  --output report.html
+```
+
+#### Disable Diagrams
+
+For markdown reports without Mermaid diagrams:
+```bash
+python "$SCRIPTS_DIR/generate_report.py" \
+  --analysis-file /tmp/readiness_analysis.json \
+  --no-diagrams
 ```
 
 ### Step 3: Present Results
 
 The report includes:
 1. **Overall Score**: Pass rate percentage and maturity level achieved
-2. **Level Progress**: Bar showing L1-L5 completion percentages
-3. **Strengths**: Top-performing pillars with passing criteria
-4. **Opportunities**: Prioritized list of improvements to implement
-5. **Detailed Criteria**: Full breakdown by pillar showing each criterion status
+2. **Level Progress**: Visual bars showing L1-L5 completion percentages
+3. **Visual Summary** (Markdown format):
+   - Pillar scores bar chart (Mermaid)
+   - Level progress chart with 80% threshold line
+   - Criteria distribution pie chart
+   - Improvement roadmap flowchart
+4. **Strengths**: Top-performing pillars with passing criteria
+5. **Opportunities**: Prioritized list of improvements to implement
+6. **Detailed Criteria**: Collapsible sections (HTML) or tables (Markdown) showing each criterion status
 
 ## Nine Technical Pillars
 
@@ -89,11 +125,11 @@ See `references/criteria.md` for the complete list of 81 criteria.
 
 | Level | Name | Description | Agent Capability |
 |-------|------|-------------|------------------|
-| L1 | Initial | Basic version control | Manual assistance only |
-| L2 | Managed | Basic CI/CD and testing | Simple, well-defined tasks |
-| L3 | Standardized | Production-ready for agents | Routine maintenance |
-| L4 | Measured | Comprehensive automation | Complex features |
-| L5 | Optimized | Full autonomous capability | End-to-end development |
+| L1 | Manual | Basic version control | Manual assistance only |
+| L2 | Scaffolded | Basic CI/CD and testing | Simple, well-defined tasks |
+| L3 | Collaborative | Production-ready for agents | Routine maintenance |
+| L4 | Automated | Comprehensive automation | Complex features |
+| L5 | Autonomous | Full autonomous capability | End-to-end development |
 
 **Level Progression**: To unlock a level, pass >=80% of criteria at that level AND all previous levels.
 
