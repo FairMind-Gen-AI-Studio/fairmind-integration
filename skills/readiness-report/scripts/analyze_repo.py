@@ -28,13 +28,23 @@ class CriterionStatus(str, Enum):
 
 
 @dataclass
+class AppInfo:
+    """Information about a detected application in a monorepo."""
+    name: str          # directory name
+    path: Path         # absolute path
+    languages: list[str] = field(default_factory=list)
+
+
+@dataclass
 class CriterionResult:
     id: str
     pillar: str
     level: int
     status: CriterionStatus
-    score: str  # "1/1", "0/1", or "—/—"
+    score: str  # "1/1", "0/1", "3/4", or "—/—"
     reason: str
+    scope: str = "repo"  # "repo" or "app"
+    app_results: dict[str, bool] = field(default_factory=dict)  # {"web": True, "api": False}
 
 
 @dataclass
@@ -63,6 +73,18 @@ class AnalysisResult:
     total_criteria: int = 0
     repo_type: str = "application"  # library, cli, database, monorepo, application
     languages: list[str] = field(default_factory=list)
+    detected_apps: list[AppInfo] = field(default_factory=list)
+    undetected_app_folders: list[str] = field(default_factory=list)  # folders without manifests
+
+
+# Scope constants: criteria evaluated once per repo vs per-app in monorepos
+APP_SCOPED_CRITERIA = {
+    "formatter", "lint_config", "type_check", "strict_typing",
+    "unit_tests_exist", "unit_tests_runnable", "test_naming_conventions", "test_isolation",
+    "integration_tests_exist", "test_coverage_thresholds",
+    "deps_pinned", "build_cmd_doc", "dockerfile_exists",
+    "structured_logging", "health_checks", "error_tracking_contextualized",
+}
 
 
 class RepoAnalyzer:
@@ -81,6 +103,7 @@ class RepoAnalyzer:
         """Run full analysis and return results."""
         self._detect_repo_type()
         self._detect_languages()
+        self._detect_apps()
         self._evaluate_all_pillars()
         self._calculate_levels()
         return self.result
@@ -213,6 +236,58 @@ class RepoAnalyzer:
             languages.append("C++")
 
         self.result.languages = languages if languages else ["Unknown"]
+
+    def _detect_apps(self):
+        """Detect individual applications in monorepo."""
+        if self.result.repo_type != "monorepo":
+            return
+
+        app_dirs = ["packages", "apps", "services", "modules"]
+        manifest_files = [
+            "package.json", "pyproject.toml", "setup.py",
+            "Cargo.toml", "go.mod", "pom.xml", "build.gradle", "Gemfile"
+        ]
+
+        for dir_name in app_dirs:
+            dir_path = self.repo_path / dir_name
+            if not dir_path.exists() or not dir_path.is_dir():
+                continue
+
+            for subdir in sorted(dir_path.iterdir()):
+                if not subdir.is_dir():
+                    continue
+                # Skip hidden directories and common non-app folders
+                if subdir.name.startswith(".") or subdir.name in ["node_modules", "__pycache__"]:
+                    continue
+
+                # Check for manifest file
+                has_manifest = any((subdir / m).exists() for m in manifest_files)
+                if has_manifest:
+                    langs = self._detect_app_languages(subdir)
+                    self.result.detected_apps.append(AppInfo(
+                        name=subdir.name,
+                        path=subdir,
+                        languages=langs
+                    ))
+                else:
+                    # Warn about folder without manifest
+                    self.result.undetected_app_folders.append(f"{dir_name}/{subdir.name}")
+
+    def _detect_app_languages(self, app_path: Path) -> list[str]:
+        """Detect languages for a specific app directory."""
+        languages = []
+        if list(app_path.glob("*.py")) or (app_path / "pyproject.toml").exists():
+            languages.append("Python")
+        if list(app_path.glob("*.ts")) or (app_path / "tsconfig.json").exists():
+            languages.append("TypeScript")
+        if list(app_path.glob("*.js")) or (app_path / "package.json").exists():
+            if "TypeScript" not in languages:
+                languages.append("JavaScript")
+        if list(app_path.glob("*.go")) or (app_path / "go.mod").exists():
+            languages.append("Go")
+        if list(app_path.glob("*.rs")) or (app_path / "Cargo.toml").exists():
+            languages.append("Rust")
+        return languages if languages else ["Unknown"]
 
     def _should_skip(self, criterion_id: str) -> tuple[bool, str]:
         """Determine if a criterion should be skipped based on repo type."""
@@ -354,55 +429,216 @@ class RepoAnalyzer:
             reason=reason
         )
 
+    def _make_app_result(
+        self,
+        criterion_id: str,
+        pillar: str,
+        level: int,
+        app_results: dict[str, bool],
+        pass_reason: str,
+        fail_reason: str
+    ) -> CriterionResult:
+        """Create result for app-scoped criterion with 80% threshold."""
+        should_skip, skip_reason = self._should_skip(criterion_id)
+        if should_skip:
+            return CriterionResult(
+                id=criterion_id,
+                pillar=pillar,
+                level=level,
+                status=CriterionStatus.SKIP,
+                score="—/—",
+                reason=skip_reason,
+                scope="app"
+            )
+
+        # For non-monorepos or no detected apps, fall back to repo-scoped
+        if self.result.repo_type != "monorepo" or not self.result.detected_apps:
+            passed = app_results.get("__repo__", False)
+            return CriterionResult(
+                id=criterion_id,
+                pillar=pillar,
+                level=level,
+                status=CriterionStatus.PASS if passed else CriterionStatus.FAIL,
+                score="1/1" if passed else "0/1",
+                reason=pass_reason if passed else fail_reason
+            )
+
+        passed_count = sum(1 for v in app_results.values() if v)
+        total_count = len(app_results)
+        pass_rate = passed_count / total_count if total_count > 0 else 0
+
+        # 80% threshold for passing
+        status = CriterionStatus.PASS if pass_rate >= 0.8 else CriterionStatus.FAIL
+
+        if status == CriterionStatus.PASS:
+            reason = pass_reason
+        else:
+            failing_apps = [name for name, passed in app_results.items() if not passed]
+            reason = f"{fail_reason} (failing: {', '.join(failing_apps)})"
+
+        return CriterionResult(
+            id=criterion_id,
+            pillar=pillar,
+            level=level,
+            status=status,
+            score=f"{passed_count}/{total_count}",
+            reason=reason,
+            scope="app",
+            app_results=app_results
+        )
+
+    def _check_file_at_path(self, path: Path, *patterns: str) -> bool:
+        """Check if any file pattern exists at the given path."""
+        for pattern in patterns:
+            if "*" in pattern:
+                if list(path.glob(pattern)):
+                    return True
+            else:
+                if (path / pattern).exists():
+                    return True
+        return False
+
+    def _check_content_at_path(self, path: Path, filename: str, pattern: str) -> bool:
+        """Check if a file at path contains a pattern."""
+        file_path = path / filename
+        if not file_path.exists():
+            return False
+        try:
+            content = file_path.read_text(errors='ignore')
+            return pattern.lower() in content.lower()
+        except Exception:
+            return False
+
+    def _check_formatter_for_path(self, path: Path) -> bool:
+        """Check if formatter is configured at given path or root."""
+        # Check at this path
+        if self._check_file_at_path(path,
+            ".prettierrc", ".prettierrc.json", ".prettierrc.js", "prettier.config.js",
+            ".black.toml", "rustfmt.toml", ".rustfmt.toml"):
+            return True
+        if self._check_content_at_path(path, "pyproject.toml", "ruff") or \
+           self._check_content_at_path(path, "pyproject.toml", "black"):
+            return True
+        # Check root (inheritance)
+        if path != self.repo_path:
+            if self._check_file_at_path(self.repo_path,
+                ".prettierrc", ".prettierrc.json", ".prettierrc.js", "prettier.config.js",
+                ".black.toml", "rustfmt.toml", ".rustfmt.toml"):
+                return True
+            if self._check_content_at_path(self.repo_path, "pyproject.toml", "ruff") or \
+               self._check_content_at_path(self.repo_path, "pyproject.toml", "black"):
+                return True
+        return False
+
+    def _check_linter_for_path(self, path: Path) -> bool:
+        """Check if linter is configured at given path or root."""
+        if self._check_file_at_path(path,
+            ".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml",
+            "eslint.config.js", "eslint.config.mjs",
+            ".pylintrc", "pylintrc", "golangci.yml", ".golangci.yml"):
+            return True
+        if self._check_content_at_path(path, "pyproject.toml", "ruff") or \
+           self._check_content_at_path(path, "pyproject.toml", "pylint"):
+            return True
+        # Check root
+        if path != self.repo_path:
+            if self._check_file_at_path(self.repo_path,
+                ".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml",
+                "eslint.config.js", "eslint.config.mjs",
+                ".pylintrc", "pylintrc", "golangci.yml", ".golangci.yml"):
+                return True
+            if self._check_content_at_path(self.repo_path, "pyproject.toml", "ruff") or \
+               self._check_content_at_path(self.repo_path, "pyproject.toml", "pylint"):
+                return True
+        return False
+
+    def _check_type_check_for_path(self, path: Path, languages: list[str]) -> bool:
+        """Check if type checking is configured at given path."""
+        if "Go" in languages or "Rust" in languages:
+            return True  # Statically typed
+        if self._check_file_at_path(path, "tsconfig.json"):
+            return True
+        if self._check_content_at_path(path, "pyproject.toml", "mypy"):
+            return True
+        # Check root
+        if path != self.repo_path:
+            if self._check_file_at_path(self.repo_path, "tsconfig.json"):
+                return True
+            if self._check_content_at_path(self.repo_path, "pyproject.toml", "mypy"):
+                return True
+        return False
+
+    def _check_tests_for_path(self, path: Path) -> bool:
+        """Check if unit tests exist at given path."""
+        return self._check_file_at_path(path,
+            "tests/**/*.py", "test/**/*.py", "*_test.py", "*_test.go",
+            "**/*.spec.ts", "**/*.spec.js", "**/*.test.ts", "**/*.test.js",
+            "spec/**/*.rb", "tests/**/*.rs"
+        )
+
+    def _check_lockfile_for_path(self, path: Path) -> bool:
+        """Check if lockfile exists at given path or root."""
+        if self._check_file_at_path(path,
+            "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
+            "uv.lock", "poetry.lock", "Pipfile.lock",
+            "go.sum", "Cargo.lock", "Gemfile.lock"):
+            return True
+        # Check root for shared lockfile
+        if path != self.repo_path:
+            if self._check_file_at_path(self.repo_path,
+                "package-lock.json", "yarn.lock", "pnpm-lock.yaml"):
+                return True
+        return False
+
     def _evaluate_style_validation(self) -> list[CriterionResult]:
         """Evaluate Style & Validation pillar."""
         pillar = "Style & Validation"
         results = []
 
-        # L1: formatter
-        formatter_found = self._file_exists(
-            ".prettierrc", ".prettierrc.json", ".prettierrc.js", "prettier.config.js",
-            "pyproject.toml", ".black.toml",  # Black/Ruff
-            ".gofmt",  # Go uses gofmt by default
-            "rustfmt.toml", ".rustfmt.toml"
-        )
-        if not formatter_found:
-            # Check pyproject.toml for ruff format
-            pyproject = self._read_file("pyproject.toml") or ""
-            formatter_found = "ruff" in pyproject.lower() or "black" in pyproject.lower()
-        results.append(self._make_result(
-            "formatter", pillar, 1, formatter_found,
-            "Formatter configured" if formatter_found else "No formatter config found"
-        ))
+        # L1: formatter (app-scoped)
+        if self.result.repo_type == "monorepo" and self.result.detected_apps:
+            app_results = {app.name: self._check_formatter_for_path(app.path) for app in self.result.detected_apps}
+            results.append(self._make_app_result(
+                "formatter", pillar, 1, app_results,
+                "Formatter configured",
+                "Add .prettierrc, ruff/black in pyproject.toml"
+            ))
+        else:
+            formatter_found = self._check_formatter_for_path(self.repo_path)
+            results.append(self._make_result(
+                "formatter", pillar, 1, formatter_found,
+                "Formatter configured" if formatter_found else "Add .prettierrc, ruff/black in pyproject.toml, or rustfmt.toml for consistent formatting"
+            ))
 
-        # L1: lint_config
-        lint_found = self._file_exists(
-            ".eslintrc", ".eslintrc.js", ".eslintrc.json", ".eslintrc.yaml",
-            "eslint.config.js", "eslint.config.mjs",
-            ".pylintrc", "pylintrc",
-            "golangci.yml", ".golangci.yml", ".golangci.yaml"
-        )
-        if not lint_found:
-            pyproject = self._read_file("pyproject.toml") or ""
-            lint_found = "ruff" in pyproject.lower() or "pylint" in pyproject.lower()
-        results.append(self._make_result(
-            "lint_config", pillar, 1, lint_found,
-            "Linter configured" if lint_found else "No linter config found"
-        ))
+        # L1: lint_config (app-scoped)
+        if self.result.repo_type == "monorepo" and self.result.detected_apps:
+            app_results = {app.name: self._check_linter_for_path(app.path) for app in self.result.detected_apps}
+            results.append(self._make_app_result(
+                "lint_config", pillar, 1, app_results,
+                "Linter configured",
+                "Add .eslintrc.js, ruff/pylint in pyproject.toml"
+            ))
+        else:
+            lint_found = self._check_linter_for_path(self.repo_path)
+            results.append(self._make_result(
+                "lint_config", pillar, 1, lint_found,
+                "Linter configured" if lint_found else "Add .eslintrc.js, ruff/pylint in pyproject.toml, or .golangci.yml"
+            ))
 
-        # L1: type_check
-        type_check = False
-        if "Go" in self.result.languages or "Rust" in self.result.languages:
-            type_check = True  # Statically typed by default
-        elif self._file_exists("tsconfig.json"):
-            type_check = True
-        elif self._file_exists("pyproject.toml"):
-            content = self._read_file("pyproject.toml") or ""
-            type_check = "mypy" in content.lower()
-        results.append(self._make_result(
-            "type_check", pillar, 1, type_check,
-            "Type checking configured" if type_check else "No type checking found"
-        ))
+        # L1: type_check (app-scoped)
+        if self.result.repo_type == "monorepo" and self.result.detected_apps:
+            app_results = {app.name: self._check_type_check_for_path(app.path, app.languages) for app in self.result.detected_apps}
+            results.append(self._make_app_result(
+                "type_check", pillar, 1, app_results,
+                "Type checking configured",
+                "Add tsconfig.json or mypy in pyproject.toml"
+            ))
+        else:
+            type_check = self._check_type_check_for_path(self.repo_path, self.result.languages)
+            results.append(self._make_result(
+                "type_check", pillar, 1, type_check,
+                "Type checking configured" if type_check else "Add tsconfig.json for TS, or mypy in pyproject.toml for Python"
+            ))
 
         # L2: strict_typing
         strict_typing = False
@@ -416,7 +652,7 @@ class RepoAnalyzer:
             strict_typing = "strict = true" in content or "strict=true" in content
         results.append(self._make_result(
             "strict_typing", pillar, 2, strict_typing,
-            "Strict typing enabled" if strict_typing else "Strict typing not enabled"
+            "Strict typing enabled" if strict_typing else "Enable 'strict: true' in tsconfig.json or mypy strict mode in pyproject.toml"
         ))
 
         # L2: pre_commit_hooks
@@ -426,7 +662,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "pre_commit_hooks", pillar, 2, pre_commit,
-            "Pre-commit hooks configured" if pre_commit else "No pre-commit hooks found"
+            "Pre-commit hooks configured" if pre_commit else "Add .pre-commit-config.yaml or .husky/ to automate checks before commits"
         ))
 
         # L2: naming_consistency
@@ -442,7 +678,7 @@ class RepoAnalyzer:
             naming = True
         results.append(self._make_result(
             "naming_consistency", pillar, 2, naming,
-            "Naming conventions enforced" if naming else "No naming convention enforcement"
+            "Naming conventions enforced" if naming else "Document naming conventions in AGENTS.md or enable @typescript-eslint/naming-convention"
         ))
 
         # L2: large_file_detection
@@ -452,7 +688,7 @@ class RepoAnalyzer:
             large_file = "check-added-large-files" in pre_commit_cfg
         results.append(self._make_result(
             "large_file_detection", pillar, 2, large_file,
-            "Large file detection configured" if large_file else "No large file detection"
+            "Large file detection configured" if large_file else "Add .gitattributes with Git LFS or check-added-large-files in pre-commit"
         ))
 
         # L3: code_modularization
@@ -461,7 +697,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "code_modularization", pillar, 3, modular,
-            "Module boundaries enforced" if modular else "No module boundary enforcement"
+            "Module boundaries enforced" if modular else "Add import-linter, nx.json, or BUILD.bazel to enforce module boundaries"
         ))
 
         # L3: cyclomatic_complexity
@@ -473,7 +709,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "cyclomatic_complexity", pillar, 3, complexity,
-            "Complexity analysis configured" if complexity else "No complexity analysis"
+            "Complexity analysis configured" if complexity else "Add mccabe/radon in pyproject.toml or gocyclo in .golangci.yml"
         ))
 
         # L3: dead_code_detection
@@ -487,7 +723,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "dead_code_detection", pillar, 3, dead_code,
-            "Dead code detection enabled" if dead_code else "No dead code detection"
+            "Dead code detection enabled" if dead_code else "Add vulture (Python), knip (JS/TS), or deadcode (Go) to CI workflow"
         ))
 
         # L3: duplicate_code_detection
@@ -499,7 +735,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "duplicate_code_detection", pillar, 3, duplicate,
-            "Duplicate detection enabled" if duplicate else "No duplicate detection"
+            "Duplicate detection enabled" if duplicate else "Add jscpd, PMD CPD, or SonarQube to CI for duplicate code detection"
         ))
 
         # L4: tech_debt_tracking
@@ -511,7 +747,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "tech_debt_tracking", pillar, 4, tech_debt,
-            "Tech debt tracking enabled" if tech_debt else "No tech debt tracking"
+            "Tech debt tracking enabled" if tech_debt else "Add TODO/FIXME scanning in CI or integrate SonarQube for tech debt tracking"
         ))
 
         # L4: n_plus_one_detection
@@ -523,7 +759,7 @@ class RepoAnalyzer:
             n_plus_one = True
         results.append(self._make_result(
             "n_plus_one_detection", pillar, 4, n_plus_one,
-            "N+1 detection enabled" if n_plus_one else "No N+1 query detection"
+            "N+1 detection enabled" if n_plus_one else "Add nplusone (Python), bullet (Ruby), or query-analyzer for N+1 detection"
         ))
 
         return results
@@ -542,19 +778,23 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "build_cmd_doc", pillar, 1, build_doc,
-            "Build commands documented" if build_doc else "Build commands not documented"
+            "Build commands documented" if build_doc else "Document build commands (npm run, make, cargo build, etc.) in README or AGENTS.md"
         ))
 
-        # L1: deps_pinned
-        lockfile = self._file_exists(
-            "package-lock.json", "yarn.lock", "pnpm-lock.yaml",
-            "uv.lock", "poetry.lock", "Pipfile.lock",
-            "go.sum", "Cargo.lock", "Gemfile.lock"
-        )
-        results.append(self._make_result(
-            "deps_pinned", pillar, 1, lockfile,
-            "Dependencies pinned with lockfile" if lockfile else "No lockfile found"
-        ))
+        # L1: deps_pinned (app-scoped)
+        if self.result.repo_type == "monorepo" and self.result.detected_apps:
+            app_results = {app.name: self._check_lockfile_for_path(app.path) for app in self.result.detected_apps}
+            results.append(self._make_app_result(
+                "deps_pinned", pillar, 1, app_results,
+                "Dependencies pinned with lockfile",
+                "Add package-lock.json, uv.lock, or Cargo.lock"
+            ))
+        else:
+            lockfile = self._check_lockfile_for_path(self.repo_path)
+            results.append(self._make_result(
+                "deps_pinned", pillar, 1, lockfile,
+                "Dependencies pinned with lockfile" if lockfile else "Add package-lock.json, uv.lock, poetry.lock, or Cargo.lock to pin dependencies"
+            ))
 
         # L1: vcs_cli_tools
         code, output = self._run_command(["gh", "auth", "status"])
@@ -564,7 +804,7 @@ class RepoAnalyzer:
             vcs_cli = code == 0
         results.append(self._make_result(
             "vcs_cli_tools", pillar, 1, vcs_cli,
-            "VCS CLI authenticated" if vcs_cli else "VCS CLI not authenticated"
+            "VCS CLI authenticated" if vcs_cli else "Run 'gh auth login' or 'glab auth login' to authenticate VCS CLI"
         ))
 
         # L2: fast_ci_feedback
@@ -576,7 +816,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "fast_ci_feedback", pillar, 2, ci_exists,
-            "CI workflow configured" if ci_exists else "No CI configuration found"
+            "CI workflow configured" if ci_exists else "Add .github/workflows/*.yml, .gitlab-ci.yml, or .circleci/config.yml"
         ))
 
         # L2: single_command_setup
@@ -586,7 +826,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "single_command_setup", pillar, 2, single_cmd,
-            "Single command setup documented" if single_cmd else "No single command setup"
+            "Single command setup documented" if single_cmd else "Document a single setup command (make install, npm install, docker-compose up) in README"
         ))
 
         # L2: release_automation
@@ -599,14 +839,14 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "release_automation", pillar, 2, release_auto,
-            "Release automation configured" if release_auto else "No release automation"
+            "Release automation configured" if release_auto else "Add a release/publish workflow in .github/workflows/ with semantic-release or similar"
         ))
 
         # L2: deployment_frequency (check for recent releases)
         release_auto_exists = release_auto  # Use same check as proxy
         results.append(self._make_result(
             "deployment_frequency", pillar, 2, release_auto_exists,
-            "Regular deployments" if release_auto_exists else "Deployment frequency unclear"
+            "Regular deployments" if release_auto_exists else "Set up CI/CD pipeline for automated deployments on merge to main"
         ))
 
         # L3: release_notes_automation
@@ -616,7 +856,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "release_notes_automation", pillar, 3, release_notes,
-            "Release notes automated" if release_notes else "No release notes automation"
+            "Release notes automated" if release_notes else "Add auto-changelog, release-please, or semantic-release for automated release notes"
         ))
 
         # L3: agentic_development
@@ -626,7 +866,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "agentic_development", pillar, 3, agentic,
-            "AI agent commits found" if agentic else "No AI agent commits detected"
+            "AI agent commits found" if agentic else "Use AI coding assistants (Claude, Copilot) with Co-Authored-By commit trailers"
         ))
 
         # L3: automated_pr_review
@@ -640,14 +880,14 @@ class RepoAnalyzer:
                     break
         results.append(self._make_result(
             "automated_pr_review", pillar, 3, pr_review,
-            "Automated PR review configured" if pr_review else "No automated PR review"
+            "Automated PR review configured" if pr_review else "Add danger.js or a PR lint workflow for automated PR review checks"
         ))
 
         # L3: feature_flag_infrastructure
         feature_flags = self._check_feature_flags()
         results.append(self._make_result(
             "feature_flag_infrastructure", pillar, 3, feature_flags,
-            "Feature flags configured" if feature_flags else "No feature flag system"
+            "Feature flags configured" if feature_flags else "Add LaunchDarkly, Statsig, Unleash, or GrowthBook for feature flag management"
         ))
 
         # L4: build_performance_tracking
@@ -656,7 +896,7 @@ class RepoAnalyzer:
             build_perf = True
         results.append(self._make_result(
             "build_performance_tracking", pillar, 4, build_perf,
-            "Build caching configured" if build_perf else "No build performance tracking"
+            "Build caching configured" if build_perf else "Add turbo.json or nx.json for build caching and performance tracking"
         ))
 
         # L4: heavy_dependency_detection (for JS bundles)
@@ -666,7 +906,7 @@ class RepoAnalyzer:
             heavy_deps = True
         results.append(self._make_result(
             "heavy_dependency_detection", pillar, 4, heavy_deps,
-            "Bundle size tracking configured" if heavy_deps else "No bundle size tracking"
+            "Bundle size tracking configured" if heavy_deps else "Add webpack-bundle-analyzer, bundlesize, or size-limit for bundle size tracking"
         ))
 
         # L4: unused_dependencies_detection
@@ -679,28 +919,28 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "unused_dependencies_detection", pillar, 4, unused_deps,
-            "Unused deps detection enabled" if unused_deps else "No unused deps detection"
+            "Unused deps detection enabled" if unused_deps else "Add depcheck (JS), deptry (Python), or 'go mod tidy' check to CI"
         ))
 
         # L4: dead_feature_flag_detection
         dead_flags = False  # Requires feature flag infra first
         results.append(self._make_result(
             "dead_feature_flag_detection", pillar, 4, dead_flags,
-            "Dead flag detection enabled" if dead_flags else "No dead flag detection"
+            "Dead flag detection enabled" if dead_flags else "Add stale flag detection via feature flag provider (LaunchDarkly, Statsig)"
         ))
 
         # L4: monorepo_tooling
         monorepo_tools = self._file_exists("lerna.json", "nx.json", "turbo.json", "pnpm-workspace.yaml")
         results.append(self._make_result(
             "monorepo_tooling", pillar, 4, monorepo_tools,
-            "Monorepo tooling configured" if monorepo_tools else "No monorepo tooling"
+            "Monorepo tooling configured" if monorepo_tools else "Add lerna.json, nx.json, turbo.json, or pnpm-workspace.yaml for monorepo management"
         ))
 
         # L4: version_drift_detection
         version_drift = False  # Complex to detect
         results.append(self._make_result(
             "version_drift_detection", pillar, 4, version_drift,
-            "Version drift detection enabled" if version_drift else "No version drift detection"
+            "Version drift detection enabled" if version_drift else "Add syncpack or manypkg check to detect package version drift across workspaces"
         ))
 
         # L5: progressive_rollout
@@ -711,14 +951,14 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "progressive_rollout", pillar, 5, progressive,
-            "Progressive rollout configured" if progressive else "No progressive rollout"
+            "Progressive rollout configured" if progressive else "Add canary deployments or gradual rollout strategy in deployment workflow"
         ))
 
         # L5: rollback_automation
         rollback = False
         results.append(self._make_result(
             "rollback_automation", pillar, 5, rollback,
-            "Rollback automation configured" if rollback else "No rollback automation"
+            "Rollback automation configured" if rollback else "Add automated rollback triggers based on error rates or health checks"
         ))
 
         return results
@@ -728,16 +968,20 @@ class RepoAnalyzer:
         pillar = "Testing"
         results = []
 
-        # L1: unit_tests_exist
-        tests_exist = self._file_exists(
-            "tests/**/*.py", "test/**/*.py", "*_test.py", "*_test.go",
-            "**/*.spec.ts", "**/*.spec.js", "**/*.test.ts", "**/*.test.js",
-            "spec/**/*.rb", "tests/**/*.rs"
-        )
-        results.append(self._make_result(
-            "unit_tests_exist", pillar, 1, tests_exist,
-            "Unit tests found" if tests_exist else "No unit tests found"
-        ))
+        # L1: unit_tests_exist (app-scoped)
+        if self.result.repo_type == "monorepo" and self.result.detected_apps:
+            app_results = {app.name: self._check_tests_for_path(app.path) for app in self.result.detected_apps}
+            results.append(self._make_app_result(
+                "unit_tests_exist", pillar, 1, app_results,
+                "Unit tests found",
+                "Add unit tests in tests/ directory"
+            ))
+        else:
+            tests_exist = self._check_tests_for_path(self.repo_path)
+            results.append(self._make_result(
+                "unit_tests_exist", pillar, 1, tests_exist,
+                "Unit tests found" if tests_exist else "Add unit tests in tests/ directory with *_test.py, *.spec.ts, or *_test.go naming"
+            ))
 
         # L1: unit_tests_runnable
         readme = self._read_file("README.md") or ""
@@ -748,7 +992,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "unit_tests_runnable", pillar, 1, test_cmd,
-            "Test commands documented" if test_cmd else "Test commands not documented"
+            "Test commands documented" if test_cmd else "Document test command (pytest, npm test, go test, etc.) in README or AGENTS.md"
         ))
 
         # L2: test_naming_conventions
@@ -762,7 +1006,7 @@ class RepoAnalyzer:
             naming = True  # Go has standard _test.go convention
         results.append(self._make_result(
             "test_naming_conventions", pillar, 2, naming,
-            "Test naming conventions enforced" if naming else "No test naming conventions"
+            "Test naming conventions enforced" if naming else "Configure pytest in pyproject.toml or jest.config.js for test naming conventions"
         ))
 
         # L2: test_isolation
@@ -780,7 +1024,7 @@ class RepoAnalyzer:
             isolation = True  # Go tests run in parallel by default
         results.append(self._make_result(
             "test_isolation", pillar, 2, isolation,
-            "Tests support isolation/parallelism" if isolation else "No test isolation"
+            "Tests support isolation/parallelism" if isolation else "Add pytest-xdist for parallel tests or use matrix strategy in CI workflow"
         ))
 
         # L3: integration_tests_exist
@@ -790,7 +1034,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "integration_tests_exist", pillar, 3, integration,
-            "Integration tests found" if integration else "No integration tests found"
+            "Integration tests found" if integration else "Add tests/integration/, e2e/, or configure Playwright/Cypress for E2E tests"
         ))
 
         # L3: test_coverage_thresholds
@@ -804,7 +1048,7 @@ class RepoAnalyzer:
             coverage = True
         results.append(self._make_result(
             "test_coverage_thresholds", pillar, 3, coverage,
-            "Coverage thresholds enforced" if coverage else "No coverage thresholds"
+            "Coverage thresholds enforced" if coverage else "Add coverage reporting (codecov.yml, .coveragerc) with minimum threshold enforcement"
         ))
 
         # L4: flaky_test_detection
@@ -816,7 +1060,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "flaky_test_detection", pillar, 4, flaky,
-            "Flaky test handling configured" if flaky else "No flaky test detection"
+            "Flaky test handling configured" if flaky else "Add test retry logic or flaky test quarantine mechanism in CI workflow"
         ))
 
         # L4: test_performance_tracking
@@ -828,7 +1072,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "test_performance_tracking", pillar, 4, test_perf,
-            "Test performance tracked" if test_perf else "No test performance tracking"
+            "Test performance tracked" if test_perf else "Add --durations flag to pytest or benchmark tracking in CI for test timing analysis"
         ))
 
         return results
@@ -842,14 +1086,14 @@ class RepoAnalyzer:
         readme = self._file_exists("README.md", "README.rst", "README.txt", "README")
         results.append(self._make_result(
             "readme", pillar, 1, readme,
-            "README exists" if readme else "No README found"
+            "README exists" if readme else "Add README.md with project overview, setup instructions, and usage examples"
         ))
 
         # L2: agents_md
         agents_md = self._file_exists("AGENTS.md", "CLAUDE.md")
         results.append(self._make_result(
             "agents_md", pillar, 2, agents_md,
-            "AGENTS.md exists" if agents_md else "No AGENTS.md found"
+            "AGENTS.md exists" if agents_md else "Add AGENTS.md or CLAUDE.md with codebase context for AI coding assistants"
         ))
 
         # L2: documentation_freshness
@@ -861,7 +1105,7 @@ class RepoAnalyzer:
             freshness = True
         results.append(self._make_result(
             "documentation_freshness", pillar, 2, freshness,
-            "Documentation recently updated" if freshness else "Documentation may be stale"
+            "Documentation recently updated" if freshness else "Update README.md with latest project changes and ensure docs stay current"
         ))
 
         # L3: api_schema_docs
@@ -872,7 +1116,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "api_schema_docs", pillar, 3, api_docs,
-            "API documentation exists" if api_docs else "No API documentation found"
+            "API documentation exists" if api_docs else "Add openapi.yaml, schema.graphql, or docs/api/ for API documentation"
         ))
 
         # L3: automated_doc_generation
@@ -882,7 +1126,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "automated_doc_generation", pillar, 3, doc_gen,
-            "Doc generation automated" if doc_gen else "No automated doc generation"
+            "Doc generation automated" if doc_gen else "Add mkdocs, sphinx, or typedoc workflow to CI for automated doc generation"
         ))
 
         # L3: service_flow_documented
@@ -892,7 +1136,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "service_flow_documented", pillar, 3, diagrams,
-            "Architecture documented" if diagrams else "No architecture documentation"
+            "Architecture documented" if diagrams else "Add docs/architecture.md with Mermaid diagrams or PlantUML for service flow"
         ))
 
         # L3: skills
@@ -901,7 +1145,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "skills", pillar, 3, skills,
-            "Skills directory exists" if skills else "No skills directory"
+            "Skills directory exists" if skills else "Add .claude/skills/ or .skills/ directory with reusable AI agent workflows"
         ))
 
         # L4: agents_md_validation
@@ -914,7 +1158,7 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "agents_md_validation", pillar, 4, agents_validation,
-            "AGENTS.md validation in CI" if agents_validation else "No AGENTS.md validation"
+            "AGENTS.md validation in CI" if agents_validation else "Add CI workflow to validate AGENTS.md structure and content on PRs"
         ))
 
         return results
@@ -932,14 +1176,14 @@ class RepoAnalyzer:
             env_template = "environment variable" in (readme + agents_md).lower()
         results.append(self._make_result(
             "env_template", pillar, 2, env_template,
-            "Environment template exists" if env_template else "No environment template"
+            "Environment template exists" if env_template else "Add .env.example or .env.template with required environment variables"
         ))
 
         # L3: devcontainer
         devcontainer = self._file_exists(".devcontainer/devcontainer.json")
         results.append(self._make_result(
             "devcontainer", pillar, 3, devcontainer,
-            "Devcontainer configured" if devcontainer else "No devcontainer found"
+            "Devcontainer configured" if devcontainer else "Add .devcontainer/devcontainer.json for reproducible dev environments"
         ))
 
         # L3: devcontainer_runnable
@@ -950,7 +1194,7 @@ class RepoAnalyzer:
                 devcontainer_valid = True
         results.append(self._make_result(
             "devcontainer_runnable", pillar, 3, devcontainer_valid,
-            "Devcontainer appears valid" if devcontainer_valid else "Devcontainer not runnable"
+            "Devcontainer appears valid" if devcontainer_valid else "Add 'image' or 'dockerFile' key to devcontainer.json"
         ))
 
         # L3: database_schema
@@ -960,7 +1204,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "database_schema", pillar, 3, db_schema,
-            "Database schema managed" if db_schema else "No database schema management"
+            "Database schema managed" if db_schema else "Add migrations/ (Alembic/Prisma/Rails) or schema.sql for database versioning"
         ))
 
         # L3: local_services_setup
@@ -970,7 +1214,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "local_services_setup", pillar, 3, local_services,
-            "Local services configured" if local_services else "No local services setup"
+            "Local services configured" if local_services else "Add docker-compose.yml for local database, cache, and service dependencies"
         ))
 
         return results
@@ -995,7 +1239,7 @@ class RepoAnalyzer:
                 logging_found = True
         results.append(self._make_result(
             "structured_logging", pillar, 2, logging_found,
-            "Structured logging configured" if logging_found else "No structured logging"
+            "Structured logging configured" if logging_found else "Add pino/winston (JS), structlog/loguru (Python), or zap/zerolog (Go) for structured logs"
         ))
 
         # L2: code_quality_metrics
@@ -1005,7 +1249,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "code_quality_metrics", pillar, 2, quality_metrics,
-            "Code quality metrics tracked" if quality_metrics else "No quality metrics"
+            "Code quality metrics tracked" if quality_metrics else "Add SonarQube, Codecov, or code coverage reporting to CI workflow"
         ))
 
         # L3: error_tracking_contextualized
@@ -1014,7 +1258,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "error_tracking_contextualized", pillar, 3, error_tracking,
-            "Error tracking configured" if error_tracking else "No error tracking"
+            "Error tracking configured" if error_tracking else "Add Sentry, Bugsnag, Rollbar, or Honeybadger for error monitoring"
         ))
 
         # L3: distributed_tracing
@@ -1023,7 +1267,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "distributed_tracing", pillar, 3, tracing,
-            "Distributed tracing configured" if tracing else "No distributed tracing"
+            "Distributed tracing configured" if tracing else "Add OpenTelemetry, Jaeger, or Datadog APM for distributed request tracing"
         ))
 
         # L3: metrics_collection
@@ -1032,7 +1276,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "metrics_collection", pillar, 3, metrics,
-            "Metrics collection configured" if metrics else "No metrics collection"
+            "Metrics collection configured" if metrics else "Add Prometheus, Datadog, or StatsD for application metrics collection"
         ))
 
         # L3: health_checks
@@ -1045,7 +1289,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "health_checks", pillar, 3, health,
-            "Health checks implemented" if health else "No health checks found"
+            "Health checks implemented" if health else "Add /health, /ready, and /alive endpoints for container orchestration"
         ))
 
         # L4: profiling_instrumentation
@@ -1054,7 +1298,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "profiling_instrumentation", pillar, 4, profiling,
-            "Profiling configured" if profiling else "No profiling instrumentation"
+            "Profiling configured" if profiling else "Add pyinstrument/py-spy (Python), pprof (Go), or clinic (Node) for profiling"
         ))
 
         # L4: alerting_configured
@@ -1063,7 +1307,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "alerting_configured", pillar, 4, alerting,
-            "Alerting configured" if alerting else "No alerting configuration"
+            "Alerting configured" if alerting else "Add monitoring/alerts.yml or configure Alertmanager/PagerDuty integration"
         ))
 
         # L4: deployment_observability
@@ -1073,14 +1317,14 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "deployment_observability", pillar, 4, deploy_obs,
-            "Deployment observability configured" if deploy_obs else "No deployment observability"
+            "Deployment observability configured" if deploy_obs else "Add deployment tracking via Datadog, Grafana annotations, or deploy notifications"
         ))
 
         # L4: runbooks_documented
         runbooks = self._file_exists("runbooks/**", "docs/runbooks/**", "ops/**")
         results.append(self._make_result(
             "runbooks_documented", pillar, 4, runbooks,
-            "Runbooks documented" if runbooks else "No runbooks found"
+            "Runbooks documented" if runbooks else "Add runbooks/ or docs/runbooks/ with incident response procedures"
         ))
 
         # L5: circuit_breakers
@@ -1089,7 +1333,7 @@ class RepoAnalyzer:
         ])
         results.append(self._make_result(
             "circuit_breakers", pillar, 5, circuit,
-            "Circuit breakers configured" if circuit else "No circuit breakers"
+            "Circuit breakers configured" if circuit else "Add opossum (Node), resilience4j (Java), or cockatiel (TS) for circuit breakers"
         ))
 
         return results
@@ -1109,7 +1353,7 @@ class RepoAnalyzer:
             ])
         results.append(self._make_result(
             "gitignore_comprehensive", pillar, 1, comprehensive,
-            "Comprehensive .gitignore" if comprehensive else "Incomplete .gitignore"
+            "Comprehensive .gitignore" if comprehensive else "Add .env, node_modules, __pycache__, .idea, .vscode to .gitignore"
         ))
 
         # L2: secrets_management
@@ -1122,21 +1366,21 @@ class RepoAnalyzer:
                 break
         results.append(self._make_result(
             "secrets_management", pillar, 2, secrets_mgmt,
-            "Secrets properly managed" if secrets_mgmt else "No secrets management"
+            "Secrets properly managed" if secrets_mgmt else "Use GitHub Secrets (${{ secrets.* }}) in workflows instead of hardcoded values"
         ))
 
         # L2: codeowners
         codeowners = self._file_exists("CODEOWNERS", ".github/CODEOWNERS")
         results.append(self._make_result(
             "codeowners", pillar, 2, codeowners,
-            "CODEOWNERS configured" if codeowners else "No CODEOWNERS file"
+            "CODEOWNERS configured" if codeowners else "Add .github/CODEOWNERS to define code ownership and review requirements"
         ))
 
         # L2: branch_protection
         branch_rules = self._file_exists(".github/branch-protection.yml", ".github/rulesets/**")
         results.append(self._make_result(
             "branch_protection", pillar, 2, branch_rules,
-            "Branch protection configured" if branch_rules else "Branch protection unclear"
+            "Branch protection configured" if branch_rules else "Enable branch protection rules in GitHub Settings or add .github/rulesets/"
         ))
 
         # L3: dependency_update_automation
@@ -1145,7 +1389,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "dependency_update_automation", pillar, 3, dep_updates,
-            "Dependency updates automated" if dep_updates else "No dependency automation"
+            "Dependency updates automated" if dep_updates else "Add .github/dependabot.yml or renovate.json for automated dependency updates"
         ))
 
         # L3: log_scrubbing
@@ -1156,7 +1400,7 @@ class RepoAnalyzer:
             log_scrub = True
         results.append(self._make_result(
             "log_scrubbing", pillar, 3, log_scrub,
-            "Log scrubbing configured" if log_scrub else "No log scrubbing"
+            "Log scrubbing configured" if log_scrub else "Configure pino redact, loguru filters, or custom log sanitizers for sensitive data"
         ))
 
         # L3: pii_handling
@@ -1167,7 +1411,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "pii_handling", pillar, 3, pii,
-            "PII handling implemented" if pii else "No PII handling found"
+            "PII handling implemented" if pii else "Add redact/sanitize/mask functions for PII in logs, errors, and responses"
         ))
 
         # L4: automated_security_review
@@ -1177,7 +1421,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "automated_security_review", pillar, 4, security_scan,
-            "Security scanning enabled" if security_scan else "No security scanning"
+            "Security scanning enabled" if security_scan else "Add CodeQL, Snyk, or SonarQube security scanning to CI workflow"
         ))
 
         # L4: secret_scanning
@@ -1187,7 +1431,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "secret_scanning", pillar, 4, secret_scan,
-            "Secret scanning enabled" if secret_scan else "No secret scanning"
+            "Secret scanning enabled" if secret_scan else "Add gitleaks or trufflehog to CI for secret scanning in commits"
         ))
 
         # L5: dast_scanning
@@ -1197,7 +1441,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "dast_scanning", pillar, 5, dast,
-            "DAST scanning enabled" if dast else "No DAST scanning"
+            "DAST scanning enabled" if dast else "Add OWASP ZAP or Burp Suite DAST scanning in CI for runtime security testing"
         ))
 
         # L5: privacy_compliance
@@ -1206,7 +1450,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "privacy_compliance", pillar, 5, privacy,
-            "Privacy compliance documented" if privacy else "No privacy documentation"
+            "Privacy compliance documented" if privacy else "Add PRIVACY.md or docs/privacy/ with GDPR/CCPA compliance documentation"
         ))
 
         return results
@@ -1222,7 +1466,7 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "issue_templates", pillar, 2, issue_templates,
-            "Issue templates configured" if issue_templates else "No issue templates"
+            "Issue templates configured" if issue_templates else "Add .github/ISSUE_TEMPLATE/ with bug_report.md and feature_request.md"
         ))
 
         # L2: issue_labeling_system
@@ -1236,7 +1480,7 @@ class RepoAnalyzer:
                     break
         results.append(self._make_result(
             "issue_labeling_system", pillar, 2, labels,
-            "Issue labels configured" if labels else "No issue labeling system"
+            "Issue labels configured" if labels else "Add 'labels:' frontmatter to issue templates for automatic categorization"
         ))
 
         # L2: pr_templates
@@ -1247,14 +1491,14 @@ class RepoAnalyzer:
         )
         results.append(self._make_result(
             "pr_templates", pillar, 2, pr_template,
-            "PR template configured" if pr_template else "No PR template"
+            "PR template configured" if pr_template else "Add .github/pull_request_template.md with checklist and description sections"
         ))
 
         # L3: backlog_health
         backlog = self._file_exists("CONTRIBUTING.md", ".github/CONTRIBUTING.md")
         results.append(self._make_result(
             "backlog_health", pillar, 3, backlog,
-            "Contributing guidelines exist" if backlog else "No contributing guidelines"
+            "Contributing guidelines exist" if backlog else "Add CONTRIBUTING.md with setup instructions, coding standards, and PR process"
         ))
 
         return results
@@ -1285,7 +1529,7 @@ class RepoAnalyzer:
                     break
         results.append(self._make_result(
             "error_to_insight_pipeline", pillar, 5, error_pipeline,
-            "Error-to-issue pipeline exists" if error_pipeline else "No error-to-issue pipeline"
+            "Error-to-issue pipeline exists" if error_pipeline else "Configure Sentry-GitHub integration to auto-create issues from production errors"
         ))
 
         # L5: product_analytics_instrumentation
@@ -1296,7 +1540,7 @@ class RepoAnalyzer:
             analytics = True
         results.append(self._make_result(
             "product_analytics_instrumentation", pillar, 5, analytics,
-            "Product analytics configured" if analytics else "No product analytics"
+            "Product analytics configured" if analytics else "Add Mixpanel, Amplitude, PostHog, or Segment for product usage analytics"
         ))
 
         return results
@@ -1368,6 +1612,8 @@ def main():
         "total_criteria": result.total_criteria,
         "achieved_level": result.achieved_level,
         "level_scores": result.level_scores,
+        "detected_apps": [{"name": app.name, "path": str(app.path), "languages": app.languages} for app in result.detected_apps],
+        "undetected_app_folders": result.undetected_app_folders,
         "pillars": {}
     }
 
