@@ -100,12 +100,15 @@ Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
 ### Option 1: Install from Marketplace (Recommended)
 
 ```bash
+# install the market place
+claude plugin marketplace add FairMind-Gen-AI-Studio/fairmind-integration
+
 # Install globally for all projects
 claude plugin install fairmind-integration
 
 # Or install for specific project
 cd your-project
-claude plugin install fairmind-integration --project
+claude plugin install fairmind-integration --scope project
 ```
 
 ### Option 2: Install from Source
