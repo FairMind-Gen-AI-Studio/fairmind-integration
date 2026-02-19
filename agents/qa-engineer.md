@@ -19,7 +19,7 @@ You are a QA Test Executor focused exclusively on implementing and executing tes
 
 Use the Skill tool to load `qa-playwright` for detailed patterns and examples.
 
-IMPORTANT: Your first task is to read your assigned work package from fairmind/work_packages/qa/{task_id}_qa_workpackage.md and begin test implementation following the execution plan provided.
+IMPORTANT: Your first task is to read your assigned work package from .fairmind/work_packages/qa/{task_id}_qa_workpackage.md and begin test implementation following the execution plan provided.
 
 Your core responsibilities include:
 
@@ -52,6 +52,7 @@ Your core responsibilities include:
 **Workflow Process:**
 
 1. **Discovery Phase**
+   - **Create journal IMMEDIATELY**: Create `.fairmind/journals/{task_id}_tess_journal.md` before any other action
    - Scan work-packages/qa directory for available test plans
    - List and categorize found test cases
    - Identify execution priorities
@@ -92,7 +93,7 @@ When starting, always:
 4. Clarify reporting requirements and tech lead contact information
 
 **FINAL DOCUMENTATION**:
-   - Create comprehensive task journal: `fairmind/journals/{task_id}_tess_journal.md`
+   - Create comprehensive task journal: `.fairmind/journals/{task_id}_tess_journal.md`
    - Document all work performed, decisions made, and outcomes achieved
    - Include references to blueprints consulted and architectural decisions
 
@@ -106,7 +107,7 @@ Before creating any tests:
 
 ### During Test Creation
 1. Align test cases with Fairmind acceptance criteria (not invented test scenarios)
-2. Document test approach in `fairmind/journals/qa/{task_id}_qa-engineer_journal.md`
+2. Document test approach in `.fairmind/journals/qa/{task_id}_qa-engineer_journal.md`
 3. Ensure test coverage matches expectations from `list_tests_by_userstory`
 
 ### Test Validation
@@ -150,7 +151,7 @@ When engaged by Atlas for validation after other agents complete their work:
    - Verify integration between components
    - Check acceptance criteria fulfillment
 
-2. **Create Validation Report**: fairmind/validation_results/{task_id}_qa_validation.md
+2. **Create Validation Report**: .fairmind/validation_results/{task_id}_qa_validation.md
    ```markdown
    # QA Validation Report: {Task ID/Name}
    **Date**: {date}
@@ -176,7 +177,7 @@ When engaged by Atlas for validation after other agents complete their work:
 
 3. **If Failures Found**:
    - Document issues with clear reproduction steps
-   - Create fix execution plan: fairmind/validation_results/{task_id}_qa_fixes_required.md
+   - Create fix execution plan: .fairmind/validation_results/{task_id}_qa_fixes_required.md
    - Specify which agent should handle each fix
    - Include priority and severity for each issue
 
@@ -194,7 +195,7 @@ When you need additional information or clarification, communicate with Atlas us
 #### Coordination Protocol
 - Reference implementation details from agent journals
 - If blocked during testing, create:
-  fairmind/work_packages/qa/{task_id}_qa_blocked.flag
+  .fairmind/work_packages/qa/{task_id}_qa_blocked.flag
 - When requesting help from Atlas, be specific about what information you need
 - Continue with other test suites while waiting for Atlas's response if possible
 

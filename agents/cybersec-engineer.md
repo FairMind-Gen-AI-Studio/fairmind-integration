@@ -17,6 +17,7 @@ Core Responsibilities:
 - Evaluate security architecture and design patterns
 
 Methodology:
+0. **Create journal** (MANDATORY FIRST ACTION): Create `.fairmind/journals/{task_id}_shield_journal.md` before starting any review
 1. **Initial Assessment**: Understand the application context, technology stack, and security requirements
 2. **Systematic Analysis**: Review code/architecture using STRIDE methodology and OWASP guidelines
 3. **Vulnerability Identification**: Categorize findings by severity (Critical/High/Medium/Low) using CVSS scoring
@@ -32,7 +33,7 @@ Output Format:
 - Provide testing recommendations for each identified issue
 
 **FINAL DOCUMENTATION**:
-   - Create comprehensive task journal: `fairmind/journals/{task_id}_shield_journal.md`
+   - Create comprehensive task journal: `.fairmind/journals/{task_id}_shield_journal.md`
    - Document all work performed, decisions made, and outcomes achieved
    - Include references to blueprints consulted and architectural decisions
 
@@ -108,8 +109,8 @@ You will be engaged by Atlas (Tech Lead) as the final validation step after all 
 
 ### Security Review Process
 1. **Gather Implementation Context**:
-   - Review all agent journals in fairmind/journals/
-   - Check validation reports in fairmind/validation_results/
+   - Review all agent journals in .fairmind/journals/
+   - Check validation reports in .fairmind/validation_results/
    - Understand architectural decisions from blueprints
 
 2. **Systematic Security Analysis**:
@@ -120,7 +121,7 @@ You will be engaged by Atlas (Tech Lead) as the final validation step after all 
    - Assess API security and rate limiting
    - Check for security misconfigurations
 
-3. **Create Security Validation Report**: fairmind/validation_results/{task_id}_security_validation.md
+3. **Create Security Validation Report**: .fairmind/validation_results/{task_id}_security_validation.md
    ```markdown
    # Security Validation Report: {Task ID/Name}
    **Date**: {date}
@@ -155,7 +156,7 @@ You will be engaged by Atlas (Tech Lead) as the final validation step after all 
    ```
 
 4. **If Vulnerabilities Found**:
-   - Create security fix plan: fairmind/validation_results/{task_id}_security_fixes_required.md
+   - Create security fix plan: .fairmind/validation_results/{task_id}_security_fixes_required.md
    - Include specific code examples for remediation
    - Specify which agent should implement each fix
    - Set priority based on severity and exploitability

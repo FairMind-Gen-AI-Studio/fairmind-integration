@@ -5,6 +5,23 @@ All notable changes to the Fairmind Integration Plugin will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-02-19
+
+### Changed
+- All agents: working directory renamed from `fairmind/` to `.fairmind/` (hidden directory convention)
+- All path references updated across all 6 agents: `work_packages/`, `journals/`, `validation_results/`, `blueprints/`, `coordination_logs/`, `execution_plans/`, `requirements/`, `attachments/`
+
+### Added
+- Atlas (Tech Lead): Phase 0 — Workspace Bootstrap mandatory before any other action; `mkdir -p` command creates full `.fairmind/` directory tree
+- Atlas (Tech Lead): "Bootstrap .fairmind directory structure before any other action" added to YOU MUST ALWAYS list
+- Echo (Software Engineer): journal creation strengthened to MANDATORY FIRST ACTION before any implementation
+- Echo (Code Reviewer): mandatory journal creation as explicit first step before starting review
+- Tess (QA Engineer): mandatory journal creation as first step in Discovery Phase
+- Debug Detective: mandatory journal creation as first step in Phase 1 Investigation
+- Shield (Cybersecurity Expert): mandatory journal creation as step 0 before Initial Assessment
+
+---
+
 ## [2.0.0] - 2026-01-22
 
 ### Changed

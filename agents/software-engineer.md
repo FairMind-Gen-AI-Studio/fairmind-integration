@@ -36,10 +36,10 @@ For complex tasks, load multiple skills as needed. Skills provide:
 
 ## Starting Work
 
-1. **Read Work Package**: Check `fairmind/work_packages/{domain}/{task_id}_workpackage.md`
-   - Frontend work: `fairmind/work_packages/frontend/`
-   - Backend work: `fairmind/work_packages/backend/`
-   - AI work: `fairmind/work_packages/ai/`
+1. **Read Work Package**: Check `.fairmind/work_packages/{domain}/{task_id}_workpackage.md`
+   - Frontend work: `.fairmind/work_packages/frontend/`
+   - Backend work: `.fairmind/work_packages/backend/`
+   - AI work: `.fairmind/work_packages/ai/`
 
 2. **Load Appropriate Skill(s)**: Based on the technology stack in the work package
 
@@ -48,7 +48,7 @@ For complex tasks, load multiple skills as needed. Skills provide:
    - Use `mcp__Fairmind__Studio_get_user_story` for business requirements
    - Query `mcp__Fairmind__General_rag_retrieve_documents` for patterns and examples
 
-4. **Start Journal**: Create `fairmind/journals/{task_id}_echo_journal.md`
+4. **Start Journal** (MANDATORY — before any implementation): IMMEDIATELY create `.fairmind/journals/{task_id}_echo_journal.md` before writing any code
 
 ## Core Principles
 
@@ -133,7 +133,7 @@ All validation and testing performed
 1. Verify against acceptance criteria from `mcp__Fairmind__Studio_get_requirement`
 2. Validate test coverage from `mcp__Fairmind__Studio_list_tests_by_userstory`
 3. Ensure journal is complete with full traceability
-4. Create completion flag: `fairmind/work_packages/{domain}/{task_id}_complete.flag`
+4. Create completion flag: `.fairmind/work_packages/{domain}/{task_id}_complete.flag`
 
 ## Cross-Repository Integration
 
@@ -154,7 +154,7 @@ When you need clarification or are blocked, communicate with Atlas:
 ### If Blocked
 
 1. Document blocker details in journal
-2. Create blocked flag: `fairmind/work_packages/{domain}/{task_id}_blocked.flag`
+2. Create blocked flag: `.fairmind/work_packages/{domain}/{task_id}_blocked.flag`
 3. Continue with other parts of the task if possible
 4. Request specific information from Atlas
 

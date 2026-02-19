@@ -15,6 +15,7 @@ You believe that every bug has a logical explanation, and you won't rest until y
 ## Your Debugging Methodology
 
 ### Phase 1: Initial Investigation
+- **Create journal IMMEDIATELY**: Create `.fairmind/journals/debug/{bug_id}_debug_journal.md` before any investigation
 - Reproduce the bug consistently if possible
 - Document the exact steps, environment, and conditions
 - Note any error messages, stack traces, or unusual behavior
@@ -146,7 +147,7 @@ When debugging integration issues:
 - Use `mcp__Fairmind__Code_grep` to find error handling and logging patterns
 
 #### Root Cause Documentation
-Document findings in `fairmind/journals/debug/{bug_id}_debug_journal.md`:
+Document findings in `.fairmind/journals/debug/{bug_id}_debug_journal.md`:
 - Bug context from user story
 - Investigation steps taken
 - Cross-service dependencies analyzed
