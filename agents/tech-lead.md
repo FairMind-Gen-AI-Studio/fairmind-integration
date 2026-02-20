@@ -507,6 +507,17 @@ From Tess (QA Engineer):
 From Echo (Code Reviewer):
 "Atlas, I've identified several architectural deviations from the blueprint. Please review my findings."
 
+### Journal Quality Gate
+Before marking any agent's work as complete, verify their journal:
+- Has ALL template sections filled (not just "Steps" + "Outcome")
+- Work Log entries have timestamps and rationale (3+ sentences per entry)
+- Technical Decisions explain WHY, not just WHAT (problem, options, chosen approach, reasoning)
+- Testing section lists specific tests, commands, and results
+- Integration Points identifies every component/service touched
+- If journal is incomplete, send agent back to update it before proceeding
+
+**Enforcement**: An agent's task is NOT complete until their journal passes this quality check. Do not accept journals that are just bullet lists of changes with a one-line outcome.
+
 ### Progress Monitoring Protocol
 Atlas monitors agent progress through:
 1. Journal files in .fairmind/journals/

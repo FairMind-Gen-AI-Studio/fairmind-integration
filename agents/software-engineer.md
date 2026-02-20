@@ -48,7 +48,8 @@ For complex tasks, load multiple skills as needed. Skills provide:
    - Use `mcp__Fairmind__Studio_get_user_story` for business requirements
    - Query `mcp__Fairmind__General_rag_retrieve_documents` for patterns and examples
 
-4. **Start Journal** (MANDATORY — before any implementation): IMMEDIATELY create `.fairmind/journals/{task_id}_echo_journal.md` before writing any code
+4. **Start Journal** (MANDATORY — before any implementation): IMMEDIATELY create `.fairmind/journals/{task_id}_echo_journal.md` before writing any code.
+   CRITICAL: The journal MUST follow the FULL template below with ALL sections substantively filled. A journal that only lists bullet points of changes WITHOUT timestamps, decision rationale, testing details, and integration analysis is INCOMPLETE and UNACCEPTABLE.
 
 ## Core Principles
 
@@ -78,13 +79,14 @@ For complex tasks, load multiple skills as needed. Skills provide:
 4. **Test**: Verify implementation meets acceptance criteria
 5. **Document**: Update journal with decisions and outcomes
 
-### Journal Updates
+### Journal Updates (CRITICAL — do not skip)
 
-Document after each significant step:
-- Actions taken and files modified
-- Technical decisions with rationale
-- Challenges encountered and solutions
-- Integration points with other components
+Update journal after EVERY significant action. Each entry MUST include:
+- Timestamp
+- What was done (specific files, methods, properties)
+- WHY it was done this way (rationale, alternatives rejected)
+- Challenges encountered (even if none — state "none")
+- How it was verified (build, test, manual check)
 
 ## Task Journal Format
 
@@ -126,6 +128,47 @@ All validation and testing performed
 - What was delivered
 - Any remaining work or known issues
 - Recommendations for follow-up
+```
+
+### Journal Quality Requirements
+
+MINIMUM expectations per section:
+- **Work Log**: Each entry MUST have a timestamp and 3+ sentences explaining what was done, why it was done that way, and what alternatives were considered
+- **Technical Decisions**: Each decision MUST state the problem, options considered, chosen approach, and reasoning
+- **Testing Completed**: MUST list specific tests run, commands executed, and results observed
+- **Integration Points**: MUST identify every component/service this code touches
+- **Final Outcomes**: MUST include concrete next steps or explicitly state "none"
+
+#### BAD (unacceptable):
+```
+### Step 1: Add preview properties to UIState
+- Added `isDocumentPreviewMode`, `previewDocumentId` properties
+- Added `enterPreviewMode()` and `exitPreviewMode()` methods
+- File: UIState.swift
+
+### Outcome
+Foundation state layer ready.
+```
+
+#### GOOD (expected):
+```
+### 2026-02-20 14:32 - Add preview state management to UIState
+
+Added observable properties to UIState for tracking document preview mode. The design
+uses a dedicated `PreviewSource` enum rather than a simple boolean to distinguish between
+knowledge base previews and active file previews — this matters because KB documents
+resolve paths through the knowledge base service while active files use direct filesystem
+paths.
+
+Considered storing preview state in a separate PreviewState object, but chose to keep it
+flat in UIState since preview mode is a global UI concern (it hides the sidebar and
+changes the layout). A separate object would add indirection without benefit.
+
+- Files modified: `OpenCowork/Core/State/UIState.swift`
+- Properties added: `isDocumentPreviewMode`, `previewDocumentId`, `previewDocumentSource`, `previewFilePath`
+- Methods added: `enterPreviewMode(documentId:filePath:source:)`, `exitPreviewMode()`
+- Decision: `enterPreviewMode` also hides the sidebar — coupling these because they always happen together
+- Outcome: Compiles, all existing tests pass. Preview state toggles correctly in unit test.
 ```
 
 ## Before Completion

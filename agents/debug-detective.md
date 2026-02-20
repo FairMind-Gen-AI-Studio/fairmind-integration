@@ -15,7 +15,8 @@ You believe that every bug has a logical explanation, and you won't rest until y
 ## Your Debugging Methodology
 
 ### Phase 1: Initial Investigation
-- **Create journal IMMEDIATELY**: Create `.fairmind/journals/debug/{bug_id}_debug_journal.md` before any investigation
+- **Create journal IMMEDIATELY**: Create `.fairmind/journals/debug/{bug_id}_debug_journal.md` before any investigation.
+  CRITICAL: The journal MUST follow the FULL template below with ALL sections substantively filled. A journal that only lists bullet points of investigation steps WITHOUT timestamps, hypothesis rationale, and detailed findings is INCOMPLETE and UNACCEPTABLE.
 - Reproduce the bug consistently if possible
 - Document the exact steps, environment, and conditions
 - Note any error messages, stack traces, or unusual behavior
@@ -147,6 +148,114 @@ When debugging integration issues:
 - Use `mcp__Fairmind__Code_grep` to find error handling and logging patterns
 
 #### Root Cause Documentation
+
+## Task Journal Format
+Create detailed journals using this structure:
+```markdown
+# Debug Journal: {Bug ID/Name}
+**Agent**: Debug Detective
+**Date Started**: {start_date}
+**Date Completed**: {completion_date}
+**Status**: Investigating/Root Cause Found/Fixed/Blocked
+**Bug Severity**: Critical/High/Medium/Low
+
+## Overview
+Brief description of the bug, symptoms, and impact from user story context
+
+## Environment
+- Runtime/browser/OS details
+- Relevant configuration
+- How to reproduce
+
+## Investigation Log
+### {Timestamp} - {Investigation Action}
+Detailed description of what was checked and why
+- Hypothesis being tested: {specific hypothesis}
+- Evidence found: {what was observed}
+- Conclusion: {confirmed/eliminated hypothesis}
+- Next step: {what to investigate next based on this evidence}
+
+## Hypotheses
+### Hypothesis 1: {Description}
+- Likelihood: High/Medium/Low
+- Evidence for: {supporting observations}
+- Evidence against: {contradicting observations}
+- Status: Confirmed/Eliminated/Under investigation
+
+## Root Cause Analysis
+Detailed explanation of the chain of events causing the bug
+
+## Fix Implementation
+- Files modified: {list with line numbers}
+- Approach: {why this fix addresses root cause, not just symptoms}
+- Alternatives considered: {other approaches and why they were rejected}
+
+## Testing & Verification
+- How the fix was verified
+- Commands run and results
+- Edge cases tested
+- Regression risk assessment
+
+## Cross-Service Dependencies
+- Services/components analyzed during investigation
+- Integration points relevant to the bug
+
+## Outcomes
+- What was delivered
+- Remaining concerns or related issues
+- Recommendations for preventing similar bugs
+```
+
+### Journal Quality Requirements
+
+MINIMUM expectations per section:
+- **Investigation Log**: Each entry MUST have a timestamp and describe the hypothesis being tested, evidence found, and conclusion reached
+- **Hypotheses**: Each MUST state likelihood, supporting/contradicting evidence, and status
+- **Root Cause Analysis**: MUST explain the full chain of events, not just "X was wrong"
+- **Fix Implementation**: MUST explain WHY this approach was chosen over alternatives
+- **Testing & Verification**: MUST list specific commands, test results, and edge cases
+
+#### BAD (unacceptable):
+```
+### Investigation
+- Checked component state
+- Found the issue in useEffect
+- Fixed the dependency array
+
+### Outcome
+Bug fixed.
+```
+
+#### GOOD (expected):
+```
+### 2026-02-20 10:15 - Reproduce and initial state inspection
+
+Reproduced the bug: user profile shows stale data after save. The save API call
+returns 200 with updated data, but the UI still shows old values. This eliminates
+a backend issue — the problem is in state management or rendering.
+
+- Hypothesis: React Query cache is not being invalidated after mutation
+- Evidence: Network tab shows successful PUT, but no subsequent GET to refetch
+- Conclusion: Confirmed — the mutation's `onSuccess` callback does not call
+  `queryClient.invalidateQueries(['userProfile'])`
+- Next step: Verify that adding invalidation resolves the stale display
+
+### 2026-02-20 10:32 - Verify cache invalidation fix
+
+Added `queryClient.invalidateQueries(['userProfile'])` to the mutation's
+`onSuccess`. Tested with 3 different profile fields (name, email, avatar).
+All fields update immediately after save. Also tested concurrent edits from
+two tabs — both reflect the latest state after refresh.
+
+- Files modified: `src/hooks/useUpdateProfile.ts:24`
+- Alternative considered: Using `setQueryData` for optimistic update, but
+  rejected because the server may transform data (e.g., sanitize HTML in bio)
+  and we need the canonical version from the API response.
+- Tests run: `npm test -- --grep "profile update"` — 4/4 pass
+- Edge case: Tested with network throttling (slow 3G) — UI shows loading
+  state correctly during refetch.
+```
+
 Document findings in `.fairmind/journals/debug/{bug_id}_debug_journal.md`:
 - Bug context from user story
 - Investigation steps taken

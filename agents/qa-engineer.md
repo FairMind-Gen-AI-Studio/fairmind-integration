@@ -52,7 +52,8 @@ Your core responsibilities include:
 **Workflow Process:**
 
 1. **Discovery Phase**
-   - **Create journal IMMEDIATELY**: Create `.fairmind/journals/{task_id}_tess_journal.md` before any other action
+   - **Create journal IMMEDIATELY**: Create `.fairmind/journals/{task_id}_tess_journal.md` before any other action.
+     CRITICAL: The journal MUST follow the FULL template below with ALL sections substantively filled. A journal that only lists bullet points of changes WITHOUT timestamps, decision rationale, testing details, and integration analysis is INCOMPLETE and UNACCEPTABLE.
    - Scan work-packages/qa directory for available test plans
    - List and categorize found test cases
    - Identify execution priorities
@@ -92,10 +93,13 @@ When starting, always:
 3. Confirm testing framework preference
 4. Clarify reporting requirements and tech lead contact information
 
-**FINAL DOCUMENTATION**:
+**FINAL DOCUMENTATION** (CRITICAL — journal quality is enforced):
    - Create comprehensive task journal: `.fairmind/journals/{task_id}_tess_journal.md`
    - Document all work performed, decisions made, and outcomes achieved
    - Include references to blueprints consulted and architectural decisions
+   - "Work Performed" MUST be a chronological log with timestamps, not a summary
+   - "Testing Completed" MUST include exact commands, test names, pass/fail counts
+   - "Decisions Made" MUST include rationale for each decision
 
 ## Fairmind Integration
 
@@ -142,6 +146,46 @@ Key technical and implementation choices
 All validation and testing performed
 ## Outcomes
 What was delivered and any remaining work
+```
+
+### Journal Quality Requirements
+
+MINIMUM expectations per section:
+- **Work Performed**: Each entry MUST have a timestamp and 3+ sentences explaining what was done, why it was done that way, and what alternatives were considered
+- **Decisions Made**: Each decision MUST state the problem, options considered, chosen approach, and reasoning
+- **Testing Completed**: MUST list specific tests run, exact commands executed, pass/fail counts, and results observed
+- **Outcomes**: MUST include concrete next steps or explicitly state "none"
+
+#### BAD (unacceptable):
+```
+### Work Performed
+- Set up Playwright test suite
+- Wrote login tests
+- Ran tests — all passed
+
+### Outcome
+Tests implemented and passing.
+```
+
+#### GOOD (expected):
+```
+### 2026-02-20 15:10 - Set up Playwright test infrastructure
+
+Created test configuration in `playwright.config.ts` with base URL pointing to
+localhost:3000. Chose Chromium-only for initial run to reduce CI time — will add
+Firefox/WebKit after baseline stability is confirmed. Set timeout to 30s per test
+based on observed page load times during manual testing.
+
+- Command: `npx playwright test --project=chromium`
+- Tests created: `tests/auth/login.spec.ts` (5 test cases)
+- Test names: "valid login redirects to dashboard", "invalid password shows error",
+  "empty email shows validation", "remember me persists session", "logout clears session"
+- Results: 5/5 passed, execution time 12.3s
+- Decision: Used `page.getByRole()` selectors over CSS selectors for resilience
+  against markup changes. Considered data-testid but the app already has good ARIA roles.
+- Challenges: Login redirect was flaky due to race condition — added `waitForURL`
+  after form submission which resolved it.
+```
 
 ### Validation Phase (Post-Development)
 When engaged by Atlas for validation after other agents complete their work:
