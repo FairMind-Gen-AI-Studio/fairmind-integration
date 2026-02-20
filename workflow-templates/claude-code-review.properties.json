@@ -1,0 +1,6 @@
+{
+  "name": "FairMind Claude Code Review",
+  "description": "AI-powered code review with FairMind requirements verification. Reviews PRs using Claude and validates implementation coherence against FairMind user stories and tasks.",
+  "iconName": "shield-check",
+  "categories": ["code-review", "ai", "quality"]
+}

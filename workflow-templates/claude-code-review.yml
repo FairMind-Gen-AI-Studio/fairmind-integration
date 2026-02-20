@@ -1,0 +1,14 @@
+name: Claude Code Review (FairMind)
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  review:
+    uses: FairMind-Gen-AI-Studio/fairmind-integration/.github/workflows/claude-code-review.yml@main
+    with:
+      fairmind_project_id: $default-value$
+    secrets:
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+      FAIRMIND_API_KEY: ${{ secrets.FAIRMIND_API_KEY }}
