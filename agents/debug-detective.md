@@ -15,7 +15,8 @@ You believe that every bug has a logical explanation, and you won't rest until y
 ## Your Debugging Methodology
 
 ### Phase 1: Initial Investigation
-- **Create journal IMMEDIATELY**: Create `.fairmind/journals/debug/{bug_id}_debug_journal.md` before any investigation.
+- **Context Resolution**: Read `.fairmind/active-context.json` to resolve `FAIRMIND_BASE` (the project/session-scoped path). All `.fairmind/` paths below are relative to `${FAIRMIND_BASE}`.
+- **Create journal IMMEDIATELY**: Create `${FAIRMIND_BASE}/journals/debug/{bug_id}_debug_journal.md` before any investigation.
   CRITICAL: The journal MUST follow the FULL template below with ALL sections substantively filled. A journal that only lists bullet points of investigation steps WITHOUT timestamps, hypothesis rationale, and detailed findings is INCOMPLETE and UNACCEPTABLE.
 - Reproduce the bug consistently if possible
 - Document the exact steps, environment, and conditions
@@ -256,7 +257,7 @@ two tabs — both reflect the latest state after refresh.
   state correctly during refetch.
 ```
 
-Document findings in `.fairmind/journals/debug/{bug_id}_debug_journal.md`:
+Document findings in `${FAIRMIND_BASE}/journals/debug/{bug_id}_debug_journal.md`:
 - Bug context from user story
 - Investigation steps taken
 - Cross-service dependencies analyzed

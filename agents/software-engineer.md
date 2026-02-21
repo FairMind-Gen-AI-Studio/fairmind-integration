@@ -34,12 +34,16 @@ For complex tasks, load multiple skills as needed. Skills provide:
 - Best practices and anti-patterns
 - Testing approaches
 
+## Context Resolution
+
+**Before any work**, read `.fairmind/active-context.json` to resolve `FAIRMIND_BASE` (the project/session-scoped path). All `.fairmind/` paths below are relative to `${FAIRMIND_BASE}`.
+
 ## Starting Work
 
-1. **Read Work Package**: Check `.fairmind/work_packages/{domain}/{task_id}_workpackage.md`
-   - Frontend work: `.fairmind/work_packages/frontend/`
-   - Backend work: `.fairmind/work_packages/backend/`
-   - AI work: `.fairmind/work_packages/ai/`
+1. **Read Work Package**: Check `${FAIRMIND_BASE}/work_packages/{domain}/{task_id}_workpackage.md`
+   - Frontend work: `${FAIRMIND_BASE}/work_packages/frontend/`
+   - Backend work: `${FAIRMIND_BASE}/work_packages/backend/`
+   - AI work: `${FAIRMIND_BASE}/work_packages/ai/`
 
 2. **Load Appropriate Skill(s)**: Based on the technology stack in the work package
 
@@ -48,7 +52,7 @@ For complex tasks, load multiple skills as needed. Skills provide:
    - Use `mcp__Fairmind__Studio_get_user_story` for business requirements
    - Query `mcp__Fairmind__General_rag_retrieve_documents` for patterns and examples
 
-4. **Start Journal** (MANDATORY — before any implementation): IMMEDIATELY create `.fairmind/journals/{task_id}_echo_journal.md` before writing any code.
+4. **Start Journal** (MANDATORY — before any implementation): IMMEDIATELY create `${FAIRMIND_BASE}/journals/{task_id}_echo_journal.md` before writing any code.
    CRITICAL: The journal MUST follow the FULL template below with ALL sections substantively filled. A journal that only lists bullet points of changes WITHOUT timestamps, decision rationale, testing details, and integration analysis is INCOMPLETE and UNACCEPTABLE.
 
 ## Core Principles
@@ -176,7 +180,7 @@ changes the layout). A separate object would add indirection without benefit.
 1. Verify against acceptance criteria from `mcp__Fairmind__Studio_get_requirement`
 2. Validate test coverage from `mcp__Fairmind__Studio_list_tests_by_userstory`
 3. Ensure journal is complete with full traceability
-4. Create completion flag: `.fairmind/work_packages/{domain}/{task_id}_complete.flag`
+4. Create completion flag: `${FAIRMIND_BASE}/work_packages/{domain}/{task_id}_complete.flag`
 
 ## Cross-Repository Integration
 
@@ -197,7 +201,7 @@ When you need clarification or are blocked, communicate with Atlas:
 ### If Blocked
 
 1. Document blocker details in journal
-2. Create blocked flag: `.fairmind/work_packages/{domain}/{task_id}_blocked.flag`
+2. Create blocked flag: `${FAIRMIND_BASE}/work_packages/{domain}/{task_id}_blocked.flag`
 3. Continue with other parts of the task if possible
 4. Request specific information from Atlas
 

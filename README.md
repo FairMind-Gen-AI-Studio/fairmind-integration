@@ -177,7 +177,7 @@ That's it. Every PR will get an AI-powered review with requirements coherence ve
 ### What the review covers
 
 1. **Standard code review** via Claude's `code-review` plugin
-2. **Journal check** — looks for `.fairmind/journals/TASK-{ID}_*_journal.md` in the PR diff
+2. **Journal check** — looks for `.fairmind/**/journals/TASK-{ID}_*_journal.md` in the PR diff
 3. **FairMind task lookup** — fetches acceptance criteria and implementation plans
 4. **Coherence assessment** — journal vs requirements (text-vs-text when possible to save tokens)
 5. **Security spot-check** — crypto, input validation, concurrency, auth config, cookie handling
@@ -387,13 +387,13 @@ Each technology skill includes:
    └─ get_task("TASK-123") → Retrieve Fairmind implementation plan
    └─ Analyze: "This needs React frontend + Node.js API"
    └─ Create work package specifying skills to load
-   └─ Write to fairmind/work_packages/frontend/TASK-123_workpackage.md
+   └─ Write to .fairmind/<project>/<session>/work_packages/frontend/TASK-123_workpackage.md
 
 2. Echo (Software Engineer)
    └─ Read work_packages/frontend/TASK-123_workpackage.md
    └─ Load `frontend-react-nextjs` skill
    └─ Use fairmind-tdd skill → Implement with TDD
-   └─ Update fairmind/journals/TASK-123_echo_journal.md
+   └─ Update .fairmind/<project>/<session>/journals/TASK-123_echo_journal.md
    └─ Create completion flag
 
 3. Tess (QA Engineer)
@@ -438,17 +438,32 @@ Each technology skill includes:
 
 ## Directory Structure Created by Workflow
 
+Atlas resolves the active project and session from FairMind, slugifies both, and scopes all artifacts under `.fairmind/<project-slug>/<session-slug>/`:
+
 ```
 your-project/
-├── fairmind/
-│   ├── work_packages/        # Atlas-adapted plans for agents
-│   │   ├── frontend/
-│   │   ├── backend/
-│   │   ├── ai/
-│   │   ├── qa/
-│   │   └── fixes/
-│   ├── journals/             # Agent progress tracking
-│   └── validation_results/   # Test and review reports
+├── .fairmind/
+│   ├── active-context.json          # Pointer to current session
+│   └── <project-slug>/
+│       └── <session-slug>/
+│           ├── context.json         # Full project/session metadata
+│           ├── execution_plans/
+│           ├── requirements/
+│           │   ├── needs/
+│           │   ├── user_stories/
+│           │   └── technical_tasks/
+│           │       └── tests/
+│           ├── attachments/
+│           ├── blueprints/
+│           ├── journals/            # Agent progress tracking
+│           ├── work_packages/       # Atlas-adapted plans for agents
+│           │   ├── frontend/
+│           │   ├── backend/
+│           │   ├── ai/
+│           │   ├── qa/
+│           │   └── fixes/
+│           ├── validation_results/  # Test and review reports
+│           └── coordination_logs/
 └── [your code]
 ```
 
@@ -462,8 +477,8 @@ Create `.claude/settings.json` in your project:
 {
   "fairmind": {
     "defaultProject": "your-project-id",
-    "journalPath": "fairmind/journals",
-    "workPackagePath": "fairmind/work_packages"
+    "journalPath": ".fairmind/<project-slug>/<session-slug>/journals",
+    "workPackagePath": ".fairmind/<project-slug>/<session-slug>/work_packages"
   }
 }
 ```
