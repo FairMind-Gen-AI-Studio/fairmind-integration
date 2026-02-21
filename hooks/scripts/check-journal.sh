@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
+CWD="${CWD:-$PWD}"
 CONTEXT_FILE="$CWD/.fairmind/active-context.json"
 
 # No active context → nothing to enforce

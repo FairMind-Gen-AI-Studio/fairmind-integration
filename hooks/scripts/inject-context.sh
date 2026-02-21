@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
+CWD="${CWD:-$PWD}"
 CONTEXT_FILE="$CWD/.fairmind/active-context.json"
 
 if [ -f "$CONTEXT_FILE" ]; then

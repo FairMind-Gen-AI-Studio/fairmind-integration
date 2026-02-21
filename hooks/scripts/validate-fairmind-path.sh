@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 FILE_PATH=$(cat | jq -r '.tool_input.file_path // empty')
 
