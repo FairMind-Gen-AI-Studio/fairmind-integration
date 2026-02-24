@@ -157,7 +157,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+  pull-requests: read
   issues: read
   id-token: write
 
@@ -165,7 +165,7 @@ jobs:
   review:
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: read
       issues: read
       id-token: write
     uses: FairMind-Gen-AI-Studio/fairmind-integration/.github/workflows/claude-code-review.yml@main
