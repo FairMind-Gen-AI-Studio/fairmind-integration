@@ -147,10 +147,10 @@ This repo provides a **reusable GitHub Actions workflow** that runs Claude Code 
    - `CLAUDE_CODE_OAUTH_TOKEN` — your Claude Code OAuth token
    - `FAIRMIND_API_KEY` — your FairMind API key
 
-2. Create `.github/workflows/review.yml` in your repo:
+2. Create `.github/workflows/fairmind-code-review.yml` in your repo:
 
 ```yaml
-name: Code Review
+name: FairMind Code Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
