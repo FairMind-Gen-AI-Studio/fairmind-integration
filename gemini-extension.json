@@ -2,7 +2,16 @@
   "name": "fairmind-integration",
   "version": "3.0.0",
   "contextFileName": "GEMINI.md",
-  "mcpServers": {},
+  "mcpServers": {
+    "fairmind": {
+      "url": "${FAIRMIND_MCP_URL}",
+      "type": "http",
+      "headers": {
+        "Authorization": "Bearer ${FAIRMIND_API_KEY}"
+      },
+      "timeout": 30000
+    }
+  },
   "excludeTools": [],
   "settings": [
     {
