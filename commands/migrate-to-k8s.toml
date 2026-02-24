@@ -1,6 +1,6 @@
 description = "Migrate application to Kubernetes with FluxCD GitOps, Istio service mesh, and IRSA"
 
-prompt = """
+prompt = '''
 ---
 description: Migrate application to Kubernetes with FluxCD GitOps, Istio service mesh, and IRSA
 model: sonnet
@@ -951,4 +951,4 @@ Is there a serverless.yml in the app repository?
          │   ├─ YES → Get repository name and tag from user
          │   └─ NO → CREATE new Terraform ECR (rare)
          └─ Update manifests with ECR details
-```"""
+```'''

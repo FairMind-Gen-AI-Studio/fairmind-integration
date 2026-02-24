@@ -1,6 +1,6 @@
 description = "Setup application performance monitoring"
 
-prompt = """
+prompt = '''
 # Add Performance Monitoring
 
 Setup application performance monitoring
@@ -1167,4 +1167,4 @@ Setup application performance monitoring
     }
 
     module.exports = PerformanceAnalyzer;
-    ```"""
+    ```'''

@@ -104,7 +104,19 @@ Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
 gemini extensions install https://github.com/FairMind-Gen-AI-Studio/fairmind-integration
 ```
 
-To update after changes are pushed:
+To install from a specific branch or tag, use `--ref`:
+
+```bash
+gemini extensions install https://github.com/FairMind-Gen-AI-Studio/fairmind-integration --ref feat/gemini-cli
+```
+
+To enable automatic updates:
+
+```bash
+gemini extensions install https://github.com/FairMind-Gen-AI-Studio/fairmind-integration --auto-update
+```
+
+To update manually after changes are pushed:
 
 ```bash
 gemini extensions update fairmind-integration
@@ -116,8 +128,8 @@ gemini extensions update fairmind-integration
 # Clone the repository
 git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git
 
-# Install from local path (creates a copy in ~/.gemini/extensions/)
-gemini extensions install --path ./fairmind-integration
+# Install from local path
+gemini extensions install ./fairmind-integration
 ```
 
 ### Option 3: Symlink for Development

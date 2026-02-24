@@ -1,6 +1,6 @@
 description = "Design and implement caching solutions"
 
-prompt = """
+prompt = '''
 # Implement Caching Strategy
 
 Design and implement caching solutions
@@ -607,4 +607,4 @@ Design and implement caching solutions
         expect(updated.body).not.toEqual(initial.body);
       });
     });
-    ```"""
+    ```'''

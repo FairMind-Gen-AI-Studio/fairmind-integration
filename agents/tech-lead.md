@@ -1,59 +1,19 @@
 ---
-name: Atlas (Tech Lead/Software Architect)
+name: atlas-tech-lead
 description: This agent is the Tech Leader who must be engaged at the beginning to retrieve all needed information by other agents to execute the task and it can be also required by other agents if they need more information like project needs, project requirements, user stories, test cases, execution plans and general information about the project.
 tools:
   - run_shell_command
   - glob
-  - search_files
+  - search_file_content
   - list_directory
   - read_file
-  - edit_file
+  - read_many_files
+  - replace
   - write_file
   - web_fetch
-  - google_search
-  - mcp__memory__create_entities
-  - mcp__memory__create_relations
-  - mcp__memory__add_observations
-  - mcp__memory__delete_entities
-  - mcp__memory__delete_observations
-  - mcp__memory__delete_relations
-  - mcp__memory__read_graph
-  - mcp__memory__search_nodes
-  - mcp__memory__open_nodes
-  - mcp__Fairmind__General_list_projects
-  - mcp__Fairmind__General_list_work_sessions
-  - mcp__Fairmind__General_list_input_sources_by_session
-  - mcp__Fairmind__General_list_user_attachments_by_project
-  - mcp__Fairmind__General_get_document_content
-  - mcp__Fairmind__General_rag_retrieve_documents
-  - mcp__Fairmind__General_rag_retrieve_documents_for_session
-  - mcp__Fairmind__General_rag_retrieve_specific_documents
-  - mcp__Fairmind__General_rag_retrieve_specific_documents_for_session
-  - mcp__Fairmind__Studio_list_needs_by_project
-  - mcp__Fairmind__Studio_list_needs_by_session
-  - mcp__Fairmind__Studio_get_need
-  - mcp__Fairmind__Studio_list_user_stories_by_project
-  - mcp__Fairmind__Studio_list_user_stories_by_need
-  - mcp__Fairmind__Studio_list_user_stories_by_session
-  - mcp__Fairmind__Studio_list_user_stories_by_role
-  - mcp__Fairmind__Studio_get_user_story
-  - mcp__Fairmind__Studio_get_related_user_stories
-  - mcp__Fairmind__Studio_list_tasks_by_project
-  - mcp__Fairmind__Studio_list_tasks_by_session
-  - mcp__Fairmind__Studio_list_development_tasks_by_session
-  - mcp__Fairmind__Studio_get_task
-  - mcp__Fairmind__Studio_list_requirements_by_project
-  - mcp__Fairmind__Studio_list_functional_requirements_by_session
-  - mcp__Fairmind__Studio_list_technical_requirements_by_session
-  - mcp__Fairmind__Studio_get_requirement
-  - mcp__Fairmind__Studio_list_tests_by_userstory
-  - mcp__Fairmind__Studio_list_tests_by_project
-  - mcp__Fairmind__Code_list_repositories
-  - mcp__Fairmind__Code_search
-  - mcp__Fairmind__Code_cat
-  - mcp__Fairmind__Code_tree
-  - mcp__Fairmind__Code_grep
-  - mcp__Fairmind__Code_find_usages
+  - google_web_search
+  - save_memory
+  - write_todos
 ---
 
 # FairMind Tech Leader Agent
