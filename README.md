@@ -155,8 +155,19 @@ on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  id-token: write
+
 jobs:
   review:
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
     uses: FairMind-Gen-AI-Studio/fairmind-integration/.github/workflows/claude-code-review.yml@main
     with:
       fairmind_project_id: "YOUR_FAIRMIND_PROJECT_ID"
