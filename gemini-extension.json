@@ -6,16 +6,15 @@
   "excludeTools": [],
   "settings": [
     {
-      "name": "FAIRMIND_API_KEY",
+      "name": "FairMind API Key",
       "description": "API key for FairMind MCP server authentication",
-      "required": true,
-      "secret": true
+      "envVar": "FAIRMIND_API_KEY",
+      "sensitive": true
     },
     {
-      "name": "FAIRMIND_MCP_URL",
-      "description": "FairMind MCP server endpoint URL",
-      "required": false,
-      "default": "https://project-context.mindstream.fairmind.ai/mcp/mcp"
+      "name": "FairMind MCP URL",
+      "description": "FairMind MCP server endpoint URL (default: https://project-context.mindstream.fairmind.ai/mcp/mcp)",
+      "envVar": "FAIRMIND_MCP_URL"
     }
   ]
 }
