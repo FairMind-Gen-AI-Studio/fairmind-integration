@@ -8,8 +8,7 @@
     {
       "name": "FairMind API Key",
       "description": "API key for FairMind MCP server authentication",
-      "envVar": "FAIRMIND_API_KEY",
-      "sensitive": true
+      "envVar": "FAIRMIND_API_KEY"
     },
     {
       "name": "FairMind MCP URL",
