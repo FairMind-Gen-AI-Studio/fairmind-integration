@@ -12,7 +12,7 @@
     },
     {
       "name": "FairMind MCP URL",
-      "description": "FairMind MCP server endpoint URL (default: https://project-context.mindstream.fairmind.ai/mcp/mcp)",
+      "description": "FairMind MCP server endpoint URL",
       "envVar": "FAIRMIND_MCP_URL"
     }
   ]
