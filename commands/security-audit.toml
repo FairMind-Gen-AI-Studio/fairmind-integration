@@ -1,3 +1,6 @@
+description = "Perform comprehensive security assessment"
+
+prompt = """
 # Security Audit Command
 
 Perform comprehensive security assessment
@@ -66,3 +69,4 @@ Perform a systematic security audit following these steps:
     - Create an executive summary with key recommendations
 
 Use automated security scanning tools when available and provide manual review for complex security patterns.
+"""

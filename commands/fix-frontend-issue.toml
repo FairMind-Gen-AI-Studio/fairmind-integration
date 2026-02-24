@@ -1,33 +1,29 @@
----
-allowed-tools: Read, Glob, TodoWrite, Task, Bash, Edit, MultiEdit, mcp_sequential-thinking
-argument-hint: [issue-file-path or issue-name]
-description: Orchestrates issue resolution by implementing fixes and validating with Playwright analyzer
-model: claude-opus-4-1-20250805
----
+description = "Orchestrates frontend issue resolution by implementing fixes and validating with Playwright analyzer"
 
+prompt = """
 # Issue Fix Orchestrator
 
 You orchestrate the issue resolution process by analyzing problems, implementing fixes, and validating changes through the Playwright analyzer agent.
 
-Issue to process: $ARGUMENTS (path to issue file or issue name)
+Issue to process: {{args}} (path to issue file or issue name)
 
 ## Orchestration Process
 
 ### Phase 1: Issue Analysis
 
 1. **Load Issue Details**
-   - Search for issue markdown files in `./issues/` directory 
+   - Search for issue markdown files in `./issues/` directory
    - Search for issue images files in `./issues/` directory
-   - If $ARGUMENTS provided, filter for specific issue
+   - If {{args}} provided, filter for specific issue
    - Understand what's broken and what needs fixing
 
 2. **Check Context**
-   - Read configuration from `./.claude/directive/` directory files (if any), except for the example file `fairmind-local-directive.md.example`
+   - Read configuration from `./.gemini/directive/` directory files (if any), except for the example file `fairmind-local-directive.md.example`
    - Review existing code that needs fixing
    - Check for iteration limits (default: max 5 iterations)
 
 3. **Initialize Tracking**
-   Use TodoWrite to create execution plan:
+   Create execution plan:
    ```
    - 1. [ ] Understand the issue
    - 2. [ ] Analyze existing code
@@ -52,14 +48,10 @@ For each iteration (max 5 unless configured otherwise):
   - Try alternative approaches if needed
 
 #### Step 2: Validate with Analyzer
-Launch the playwright-issue-analyzer agent:
-```yaml
-Task:
-  description: "Execute and fix generated Playwright test"
-  subagent_type: "playwright-issue-analyzer"
-  prompt: |
-    Use the Playwright tools to verify the fix: [fix description]
-    Return the report file path.
+Delegate to the playwright-issue-analyzer subagent:
+```
+Use the Playwright tools to verify the fix: [fix description]
+Return the report file path.
 ```
 Wait for agent to complete and generate report.
 
@@ -125,4 +117,4 @@ If no progress after 2 iterations:
    Fixes Applied: [list of changes]
    Validation Reports: ./analyzer-output/
    ```
-
+"""

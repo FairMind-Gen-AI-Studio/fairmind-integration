@@ -222,7 +222,7 @@ def main():
         'pull_request': pr_number
     }
     
-    # Output JSON report to stdout for Claude to parse
+    # Output JSON report to stdout for Gemini CLI to parse
     print(json.dumps(report, indent=2))
     
     # Save to file in project root for reference

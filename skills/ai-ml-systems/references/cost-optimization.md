@@ -12,9 +12,8 @@
 │                                                         │
 │  Model               Input    Output    Ratio           │
 │  ─────────────────────────────────────────────────      │
-│  Claude Opus         $15      $75       5x              │
-│  Claude Sonnet       $3       $15       5x              │
-│  Claude Haiku        $0.25    $1.25     5x              │
+│  Gemini 2.5 Pro      $1.25    $5.00     4x              │
+│  Gemini 2.5 Flash    $0.075   $0.30     4x              │
 │  GPT-4               $10      $30       3x              │
 │  GPT-4-mini          $0.15    $0.60     4x              │
 │                                                         │
@@ -41,9 +40,8 @@ class CostTracker:
     """Track and analyze LLM costs."""
 
     PRICING = {
-        "claude-opus-4-20250514": {"input": 15.0, "output": 75.0},
-        "claude-sonnet-4-20250514": {"input": 3.0, "output": 15.0},
-        "claude-3-5-haiku-20241022": {"input": 0.25, "output": 1.25},
+        "gemini-2.5-pro": {"input": 1.25, "output": 5.0},
+        "gemini-2.5-flash": {"input": 0.075, "output": 0.30},
     }
 
     def __init__(self):
@@ -223,9 +221,9 @@ class ModelRouter:
 
     def __init__(self):
         self.models = {
-            "high": "claude-opus-4-20250514",
-            "medium": "claude-sonnet-4-20250514",
-            "low": "claude-3-5-haiku-20241022",
+            "high": "gemini-2.5-pro",
+            "medium": "gemini-2.5-pro",
+            "low": "gemini-2.5-flash",
         }
 
     def route(self, request: dict) -> str:
@@ -285,9 +283,8 @@ class CascadingRouter:
 
     async def execute(self, request: dict) -> str:
         models = [
-            "claude-3-5-haiku-20241022",
-            "claude-sonnet-4-20250514",
-            "claude-opus-4-20250514"
+            "gemini-2.5-flash",
+            "gemini-2.5-pro",
         ]
 
         for model in models:

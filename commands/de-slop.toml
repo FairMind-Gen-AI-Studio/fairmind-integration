@@ -1,3 +1,6 @@
+description = "Remove AI-generated artifacts before PR submission"
+
+prompt = """
 # De-Slop Command
 
 Remove AI-generated artifacts before PR submission.
@@ -41,7 +44,7 @@ Simple getter with 10-line docstring
 ```python
 @patch @patch @patch  # >3 mocks, tests nothing real
 ```
-Note: CLAUDE.md says "no mocking in tests"
+Note: GEMINI.md says "no mocking in tests"
 
 #### F. Fake Data
 Suspiciously specific metrics without citation, made-up case studies
@@ -125,3 +128,4 @@ Next: Review flagged items, run tests, commit
 
 - Threshold for "excessive" docstring?
 - Check commit messages for slop?
+"""

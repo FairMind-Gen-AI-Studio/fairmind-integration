@@ -1,3 +1,6 @@
+description = "Collaborative test creation through coverage analysis and discussion"
+
+prompt = """
 # Make Tests
 
 Collaborative test creation through coverage analysis and discussion.
@@ -96,7 +99,7 @@ cat tests/conftest.py  # fixtures
 
 **Follow patterns:** test naming, imports, fixtures, assertions
 
-**No mocking unless necessary** (per CLAUDE.md)
+**No mocking unless necessary** (per GEMINI.md)
 
 ## Output Format
 
@@ -122,3 +125,4 @@ Remaining gaps:
 /make-tests path/to/module.py  # Specific module
 /make-tests "feature desc"     # Described feature
 ```
+"""

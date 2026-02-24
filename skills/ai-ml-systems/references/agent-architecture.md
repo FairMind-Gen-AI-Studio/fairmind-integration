@@ -72,7 +72,7 @@ class SupervisorAgent:
 
     async def create_plan(self, task: str) -> Plan:
         response = await self.llm.generate(
-            model="claude-sonnet-4-20250514",
+            model="gemini-2.5-pro",
             messages=[{
                 "role": "user",
                 "content": f"Create execution plan for: {task}"
@@ -376,7 +376,7 @@ class ResilientAgent:
     async def _primary_execution(self, task: str) -> str:
         """Full capability execution."""
         return await self.llm.generate(
-            model="claude-sonnet-4-20250514",
+            model="gemini-2.5-pro",
             messages=[{"role": "user", "content": task}],
             tools=self.all_tools
         )
@@ -384,7 +384,7 @@ class ResilientAgent:
     async def _simplified_execution(self, task: str) -> str:
         """Reduced capability execution."""
         return await self.llm.generate(
-            model="claude-3-5-haiku-20241022",
+            model="gemini-2.5-flash",
             messages=[{"role": "user", "content": task}],
             tools=self.essential_tools
         )
@@ -392,7 +392,7 @@ class ResilientAgent:
     async def _fallback_execution(self, task: str) -> str:
         """No tools, direct response."""
         return await self.llm.generate(
-            model="claude-3-5-haiku-20241022",
+            model="gemini-2.5-flash",
             messages=[{"role": "user", "content": task}]
         )
 ```

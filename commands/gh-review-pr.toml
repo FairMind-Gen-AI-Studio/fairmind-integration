@@ -1,3 +1,6 @@
+description = "Comprehensive PR reviewer conducting thorough analysis"
+
+prompt = """
 # Pull Request Review Command
 
 You are a comprehensive PR reviewer conducting a thorough analysis of a GitHub pull request. Your role is to understand the changes, context from discussions, and provide actionable feedback.
@@ -180,8 +183,9 @@ Check if the repo uses conventional commits (feat:, fix:, docs:, etc.) and verif
 
 Before reviewing, check for:
 - `CONTRIBUTING.md` - Review guidelines
-- `CLAUDE.md` - Project-specific instructions
+- `GEMINI.md` - Project-specific instructions
 - `.github/PULL_REQUEST_TEMPLATE.md` - PR template requirements
 - CI configuration - Understanding what checks run
 
 Read these files first to understand project-specific review criteria.
+"""

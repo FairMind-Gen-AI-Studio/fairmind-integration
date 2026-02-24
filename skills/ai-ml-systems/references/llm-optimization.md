@@ -11,15 +11,15 @@
 │                                                         │
 │  Complexity ▲                                           │
 │             │  ┌─────────────────────────────────┐      │
-│    High     │  │  Claude Opus / GPT-4           │      │
+│    High     │  │  Gemini 2.5 Pro / GPT-4        │      │
 │             │  │  Complex reasoning, analysis    │      │
 │             │  └─────────────────────────────────┘      │
 │             │  ┌─────────────────────────────────┐      │
-│    Medium   │  │  Claude Sonnet / GPT-4-mini    │      │
+│    Medium   │  │  Gemini 2.5 Pro / GPT-4-mini   │      │
 │             │  │  Code, structured output        │      │
 │             │  └─────────────────────────────────┘      │
 │             │  ┌─────────────────────────────────┐      │
-│    Low      │  │  Claude Haiku / GPT-3.5        │      │
+│    Low      │  │  Gemini 2.5 Flash / GPT-3.5    │      │
 │             │  │  Classification, extraction     │      │
 │             │  └─────────────────────────────────┘      │
 │             └────────────────────────────────────► Cost │
@@ -31,23 +31,23 @@
 ```python
 MODEL_ROUTING = {
     # High complexity - use best model
-    "complex_reasoning": "claude-opus-4-20250514",
-    "code_review": "claude-sonnet-4-20250514",
-    "architecture_design": "claude-opus-4-20250514",
+    "complex_reasoning": "gemini-2.5-pro",
+    "code_review": "gemini-2.5-pro",
+    "architecture_design": "gemini-2.5-pro",
 
     # Medium complexity - balanced model
-    "code_generation": "claude-sonnet-4-20250514",
-    "summarization": "claude-sonnet-4-20250514",
-    "translation": "claude-sonnet-4-20250514",
+    "code_generation": "gemini-2.5-pro",
+    "summarization": "gemini-2.5-pro",
+    "translation": "gemini-2.5-pro",
 
     # Low complexity - cost-effective model
-    "classification": "claude-3-5-haiku-20241022",
-    "extraction": "claude-3-5-haiku-20241022",
-    "formatting": "claude-3-5-haiku-20241022",
+    "classification": "gemini-2.5-flash",
+    "extraction": "gemini-2.5-flash",
+    "formatting": "gemini-2.5-flash",
 }
 
 def select_model(task_type: str, context: dict) -> str:
-    base_model = MODEL_ROUTING.get(task_type, "claude-sonnet-4-20250514")
+    base_model = MODEL_ROUTING.get(task_type, "gemini-2.5-pro")
 
     # Upgrade for critical paths
     if context.get("is_critical"):
@@ -168,7 +168,7 @@ class AnalysisResult(BaseModel):
 
 # Force structured output
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="gemini-2.5-pro",
     messages=[{"role": "user", "content": prompt}],
     tools=[{
         "name": "submit_analysis",
@@ -239,7 +239,7 @@ def get_temperature(task_type: str) -> float:
 ```python
 # For diverse outputs
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="gemini-2.5-pro",
     messages=[{"role": "user", "content": prompt}],
     temperature=0.8,
     top_p=0.95,  # Nucleus sampling
@@ -247,7 +247,7 @@ response = client.messages.create(
 
 # For consistent outputs
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
+    model="gemini-2.5-pro",
     messages=[{"role": "user", "content": prompt}],
     temperature=0.0,  # Greedy decoding
 )
@@ -322,7 +322,7 @@ Don't fine-tune when:
 ### Fine-Tuning Data Format
 
 ```python
-# Training data format for Claude
+# Training data format for Gemini
 training_examples = [
     {
         "messages": [

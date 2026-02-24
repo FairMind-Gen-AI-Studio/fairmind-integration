@@ -1,0 +1,40 @@
+description = "Execute the Gemini CLI Docs helper script at ~/.gemini-docs/gemini-docs-helper.sh"
+
+prompt = """
+Execute the Gemini CLI Docs helper script at ~/.gemini-docs/gemini-docs-helper.sh
+
+Usage:
+- /docs - List all available documentation topics
+- /docs <topic> - Read specific documentation with link to official docs
+- /docs -t - Check sync status without reading a doc
+- /docs -t <topic> - Check freshness then read documentation
+- /docs whats new - Show recent documentation changes (or "what's new")
+
+Examples of expected output:
+
+When reading a doc:
+📚 COMMUNITY MIRROR: https://github.com/ericbuess/gemini-docs
+📖 OFFICIAL DOCS: https://docs.google.com/gemini
+
+[Doc content here...]
+
+📖 Official page: https://docs.google.com/gemini/hooks
+
+When showing what's new:
+📚 Recent documentation updates:
+
+• 5 hours ago:
+  📎 https://github.com/ericbuess/gemini-docs/commit/eacd8e1
+  📄 data-usage: https://docs.google.com/gemini/data-usage
+     ➕ Added: Privacy safeguards
+  📄 security: https://docs.google.com/gemini/security
+     ✨ Data flow and dependencies section moved here
+
+📎 Full changelog: https://github.com/ericbuess/gemini-docs/commits/main/docs
+📚 COMMUNITY MIRROR - NOT AFFILIATED WITH GOOGLE
+
+Every request checks for the latest documentation from GitHub (takes ~0.4s).
+The helper script handles all functionality including auto-updates.
+
+Execute: ~/.gemini-docs/gemini-docs-helper.sh "{{args}}"
+"""

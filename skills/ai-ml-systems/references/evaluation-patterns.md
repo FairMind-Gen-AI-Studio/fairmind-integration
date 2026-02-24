@@ -123,7 +123,7 @@ Rate the correctness from 0 to 10, where:
 Respond with just the number."""
 
         response = await self.llm.generate(
-            model="claude-3-5-haiku-20241022",
+            model="gemini-2.5-flash",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0
         )
@@ -173,7 +173,7 @@ class RelevanceEvaluator:
         )
 
         response = await self.llm.generate(
-            model="claude-3-5-haiku-20241022",
+            model="gemini-2.5-flash",
             messages=[{"role": "user", "content": prompt}],
             temperature=0.0
         )
@@ -253,7 +253,7 @@ List each claim on a separate line. Only include verifiable factual statements.
 """
 
         response = await self.llm.generate(
-            model="claude-3-5-haiku-20241022",
+            model="gemini-2.5-flash",
             messages=[{"role": "user", "content": prompt}]
         )
 

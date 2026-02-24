@@ -51,9 +51,9 @@ Choose models based on task complexity:
 
 | Task Type | Recommended Model | Rationale |
 |-----------|------------------|-----------|
-| Complex reasoning | Claude Opus/Sonnet | Best accuracy |
-| Code generation | Claude Sonnet | Good balance |
-| Simple extraction | Claude Haiku | Cost-effective |
+| Complex reasoning | Gemini 2.5 Pro | Best accuracy |
+| Code generation | Gemini 2.5 Pro | Good balance |
+| Simple extraction | Gemini 2.5 Flash | Cost-effective |
 | Embeddings | text-embedding-3-small | Good quality/cost |
 | Classification | Fine-tuned small model | Task-specific |
 

@@ -1,0 +1,20 @@
+{
+  "name": "fairmind-integration",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {},
+  "excludeTools": [],
+  "settings": [
+    {
+      "name": "FAIRMIND_API_KEY",
+      "description": "API key for FairMind MCP server authentication",
+      "required": true,
+      "secret": true
+    },
+    {
+      "name": "FAIRMIND_MCP_URL",
+      "description": "FairMind MCP server endpoint URL",
+      "required": false,
+      "default": "https://project-context.mindstream.fairmind.ai/mcp/mcp"
+    }
+  ]
+}

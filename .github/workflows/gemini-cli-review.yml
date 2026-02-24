@@ -1,0 +1,113 @@
+name: Gemini CLI Code Review (FairMind)
+
+# TODO: This workflow is a placeholder for Gemini CLI-based PR review.
+# The original Claude Code workflow used anthropics/claude-code-action@v1.
+# A Gemini CLI equivalent GitHub Action needs to be identified or built.
+#
+# The review logic (FairMind requirements verification, journal-first approach,
+# security spot-checks) remains the same — only the execution engine changes.
+
+on:
+  workflow_call:
+    inputs:
+      fairmind_project_id:
+        description: "FairMind project ID for requirements verification"
+        required: true
+        type: string
+      fairmind_mcp_url:
+        description: "FairMind MCP server URL"
+        required: false
+        type: string
+        default: "https://project-context.mindstream.fairmind.ai/mcp/mcp"
+    secrets:
+      GEMINI_API_KEY:
+        description: "Gemini API key"
+        required: true
+      FAIRMIND_API_KEY:
+        description: "FairMind API key for MCP access"
+        required: true
+
+concurrency:
+  group: gemini-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  gemini-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create FairMind MCP Config
+        env:
+          FAIRMIND_API_KEY: ${{ secrets.FAIRMIND_API_KEY }}
+          FAIRMIND_MCP_URL: ${{ inputs.fairmind_mcp_url }}
+        run: |
+          jq -n \
+            --arg url "$FAIRMIND_MCP_URL" \
+            --arg key "$FAIRMIND_API_KEY" \
+            '{
+              mcpServers: {
+                FairMind: {
+                  type: "http",
+                  url: $url,
+                  headers: { Authorization: ("Bearer " + $key) }
+                }
+              }
+            }' > /tmp/fairmind-mcp.json
+
+      # TODO: Replace with Gemini CLI GitHub Action when available.
+      # The review prompt below contains the full review logic.
+      # Options for implementation:
+      # 1. Use google-gemini/gemini-cli-action (if/when released)
+      # 2. Install gemini-cli via npm and run directly
+      # 3. Use Gemini API directly via curl/script
+      - name: Run Gemini CLI Code Review
+        id: gemini-review
+        run: |
+          echo "TODO: Gemini CLI GitHub Action integration pending"
+          echo "Review logic preserved in workflow comments"
+          echo "See .github/workflows/gemini-cli-review.yml for full review prompt"
+          exit 0
+
+      # REVIEW PROMPT (to be passed to Gemini CLI when action is available):
+      #
+      # ## FairMind Requirements Verification
+      #
+      # After the standard code review, verify implementation coherence with FairMind
+      # using a journal-first approach to save tokens.
+      #
+      # ### Phase 1: Journal Check (always do this first)
+      # 1. Look for journal files in the PR diff under `.fairmind/journals/`.
+      #    They follow naming `TASK-{ID}_{agent}_journal.md`.
+      # 2. If journal(s) found, read them. They contain: overview, work log,
+      #    files modified, technical decisions, outcomes.
+      # 3. Extract the TASK IDs referenced in the journal filenames.
+      #
+      # ### Phase 2: FairMind Task Lookup
+      # 1. Use `mcp__FairMind__General_list_work_sessions` to find active sessions.
+      # 2. Use `mcp__FairMind__Studio_get_task` with TASK IDs from journals.
+      # 3. If no TASK ID found, use PR title/branch to search tasks.
+      #
+      # ### Phase 3: Coherence Assessment
+      # If journal exists and is complete: text-vs-text comparison.
+      # If journal missing/incomplete: analyze actual code diff.
+      #
+      # ### Phase 4: Security Spot-Check
+      # 1. Crypto & hashing (salt/HMAC, algorithm appropriateness)
+      # 2. Input validation (type checking, length limits, sanitization)
+      # 3. Concurrency (race conditions, upserts, transactions)
+      # 4. Auth/session config
+      # 5. Cookie handling (safe parsing)
+      #
+      # ### Phase 5: Structured Report
+      # Summary table, acceptance criteria checklist, security spot-check,
+      # specification gaps, scope check.

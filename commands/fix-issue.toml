@@ -1,21 +1,17 @@
----
-allowed-tools: Read, Glob, TodoWrite, Task, Bash, Edit, MultiEdit
-argument-hint: [issue-name] [--type fe-fe|fe-be|be-be]
-description: Enhanced issue fix orchestrator with intelligent classification and specialized agents
-model: claude-opus-4-1-20250805
----
+description = "Enhanced issue fix orchestrator with intelligent classification and specialized agents"
 
+prompt = """
 # Enhanced Issue Fix Orchestrator
 
-You orchestrate issue resolution by classifying issues, confirming with user, and delegating to the Echo (Software Engineer) agent with appropriate skills.
+You orchestrate issue resolution by classifying issues, confirming with user, and delegating to the Echo (Software Engineer) subagent with appropriate skills.
 
-Issue to process: $ARGUMENTS
+Issue to process: {{args}}
 
 ## Phase 1: Issue Analysis and Classification
 
 ### 1. Load Issue Details
 - Search for issue markdown files in `./issues/` directory
-- If $ARGUMENTS contains issue name, filter for specific issue
+- If {{args}} contains issue name, filter for specific issue
 - Read issue content and any associated images
 
 ### 2. Classify Issue Type
@@ -41,7 +37,7 @@ Analyze the issue to determine its category:
 
 ### 3. User Confirmation (ALWAYS unless --type specified)
 
-Check if `--type` parameter provided in $ARGUMENTS:
+Check if `--type` parameter provided in {{args}}:
 - If YES: Skip confirmation, use specified type
 - If NO: ALWAYS ask for confirmation
 
@@ -60,7 +56,7 @@ Wait for user response before proceeding.
 
 ## Phase 2: Initialize Tracking
 
-Use TodoWrite to create execution plan:
+Create execution plan:
 ```
 1. [ ] Analyze issue: [name]
 2. [ ] Classify as: [type]
@@ -73,100 +69,80 @@ Use TodoWrite to create execution plan:
 ## Phase 3: Agent Delegation
 
 ### For FE-FE Issues:
-Launch Echo (Software Engineer) with frontend skill:
-```yaml
-Task:
-  description: "Fix frontend issue"
-  subagent_type: "fairmind-integration:Echo (Software Engineer)"
-  prompt: |
-    Fix the frontend issue: $ARGUMENTS
-    Issue type: FE-FE (Frontend Only)
+Delegate to Echo (Software Engineer) with frontend skill:
+```
+Fix the frontend issue: {{args}}
+Issue type: FE-FE (Frontend Only)
 
-    IMPORTANT: Load the `frontend-react-nextjs` skill first for React/NextJS patterns.
+IMPORTANT: Load the `frontend-react-nextjs` skill first for React/NextJS patterns.
 
-    Steps:
-    1. Load the skill using the Skill tool
-    2. Navigate to affected page using Playwright MCP tools
-    3. Reproduce the visual issue
-    4. Identify and fix the problem using skill patterns
-    5. Validate the fix with Playwright
+Steps:
+1. Load the skill
+2. Navigate to affected page using Playwright MCP tools
+3. Reproduce the visual issue
+4. Identify and fix the problem using skill patterns
+5. Validate the fix with Playwright
 
-    Write report to: ./analyzer-output/[issue]-report-[iteration].md
-    Return the report path.
+Write report to: ./analyzer-output/[issue]-report-[iteration].md
+Return the report path.
 ```
 
 ### For BE-BE Issues:
-Launch Echo (Software Engineer) with backend skill:
-```yaml
-Task:
-  description: "Fix backend issue"
-  subagent_type: "fairmind-integration:Echo (Software Engineer)"
-  prompt: |
-    Fix the backend issue: $ARGUMENTS
-    Issue type: BE-BE (Backend Only)
+Delegate to Echo (Software Engineer) with backend skill:
+```
+Fix the backend issue: {{args}}
+Issue type: BE-BE (Backend Only)
 
-    IMPORTANT: Load the `backend-nextjs` skill first (or `backend-python` for Python projects).
+IMPORTANT: Load the `backend-nextjs` skill first (or `backend-python` for Python projects).
 
-    Steps:
-    1. Load the appropriate backend skill using the Skill tool
-    2. Run tests to reproduce issue
-    3. If no test covers it, create new test
-    4. Fix the backend logic/API following skill patterns
-    5. Validate all tests pass
+Steps:
+1. Load the appropriate backend skill
+2. Run tests to reproduce issue
+3. If no test covers it, create new test
+4. Fix the backend logic/API following skill patterns
+5. Validate all tests pass
 
-    Write report to: ./analyzer-output/[issue]-report-[iteration].md
-    Return the report path.
+Write report to: ./analyzer-output/[issue]-report-[iteration].md
+Return the report path.
 ```
 
 ### For FE-BE Issues:
 Sequential execution with Echo agent:
 
 1. First, analyze with frontend focus:
-```yaml
-Task:
-  description: "Analyze frontend-backend data issue"
-  subagent_type: "fairmind-integration:Echo (Software Engineer)"
-  prompt: |
-    Analyze frontend-backend issue: $ARGUMENTS
+```
+Analyze frontend-backend issue: {{args}}
 
-    Load both `frontend-react-nextjs` and `backend-nextjs` skills.
+Load both `frontend-react-nextjs` and `backend-nextjs` skills.
 
-    Focus on identifying what data is wrong/missing:
-    1. Use Playwright to inspect network requests
-    2. Document API calls and expected vs actual data
-    3. Identify if issue is in frontend consumption or backend response
+Focus on identifying what data is wrong/missing:
+1. Use Playwright to inspect network requests
+2. Document API calls and expected vs actual data
+3. Identify if issue is in frontend consumption or backend response
 
-    Write findings to: ./analyzer-output/[issue]-frontend-analysis.md
+Write findings to: ./analyzer-output/[issue]-frontend-analysis.md
 ```
 
 2. Then, fix backend if needed:
-```yaml
-Task:
-  description: "Fix backend based on frontend findings"
-  subagent_type: "fairmind-integration:Echo (Software Engineer)"
-  prompt: |
-    Fix backend issue identified by frontend analysis.
+```
+Fix backend issue identified by frontend analysis.
 
-    Load `backend-nextjs` skill for patterns.
+Load `backend-nextjs` skill for patterns.
 
-    Read: ./analyzer-output/[issue]-frontend-analysis.md
+Read: ./analyzer-output/[issue]-frontend-analysis.md
 
-    Fix data structure/API response issues following skill patterns.
-    Write report to: ./analyzer-output/[issue]-backend-fix.md
+Fix data structure/API response issues following skill patterns.
+Write report to: ./analyzer-output/[issue]-backend-fix.md
 ```
 
 3. Finally, re-validate with frontend:
-```yaml
-Task:
-  description: "Validate frontend after backend fix"
-  subagent_type: "fairmind-integration:Echo (Software Engineer)"
-  prompt: |
-    Validate the frontend now works after backend fix.
+```
+Validate the frontend now works after backend fix.
 
-    Load `frontend-react-nextjs` skill and use Playwright MCP tools.
+Load `frontend-react-nextjs` skill and use Playwright MCP tools.
 
-    Test the original issue scenario.
-    Write final report to: ./analyzer-output/[issue]-report-final.md
+Test the original issue scenario.
+Write final report to: ./analyzer-output/[issue]-report-final.md
 ```
 
 ## Phase 4: Iterative Fix Loop
@@ -200,7 +176,7 @@ Extract:
 - Exit with detailed report
 
 ### 3. Next Iteration
-If continuing, launch agent again with:
+If continuing, delegate to agent again with:
 - Previous report path
 - Specific failed steps to address
 - Iteration number
@@ -245,3 +221,4 @@ If agent fails or times out:
 - Document failure and request manual help
 
 Always maintain clear communication with user about progress and any blockers.
+"""

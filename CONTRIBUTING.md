@@ -1,19 +1,19 @@
-# Contributing to Fairmind Integration Plugin
+# Contributing to Fairmind Integration Extension
 
-Thank you for your interest in contributing to the Fairmind Integration Plugin! This document provides guidelines for contributing agents, skills, commands, and improvements.
+Thank you for your interest in contributing to the Fairmind Integration Extension! This document provides guidelines for contributing agents, skills, commands, and improvements.
 
 ## Development Setup
 
 ### Prerequisites
 
-1. **Claude Code** installed and configured
+1. **Gemini CLI** installed and configured
 2. **Fairmind MCP Server** access (HTTP-based remote server)
 3. **Fairmind authentication token** (Bearer token)
 4. **Git** for version control
 
 ### MCP Server Setup
 
-Configure the Fairmind MCP server in your `~/.claude/settings.json`:
+Configure the Fairmind MCP server in your `~/.gemini/settings.json`:
 
 ```json
 {
@@ -29,12 +29,6 @@ Configure the Fairmind MCP server in your `~/.claude/settings.json`:
 }
 ```
 
-Or use the Claude CLI:
-
-```bash
-claude mcp add --transport http Fairmind https://project-context.mindstream.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
-```
-
 ### Local Development
 
 ```bash
@@ -43,10 +37,10 @@ git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git
 cd fairmind-integration
 
 # Create symlink for testing
-ln -s $(pwd) ~/.claude/plugins/fairmind-integration-dev
+ln -s $(pwd) ~/.gemini/extensions/fairmind-integration-dev
 
 # Or copy to project for testing
-cp -r . /path/to/test-project/.claude/plugins/fairmind-integration-dev
+cp -r . /path/to/test-project/.gemini/extensions/fairmind-integration-dev
 ```
 
 ## Contribution Types
@@ -87,7 +81,7 @@ You are [Agent Name], a [description of role and expertise].
 - Common pitfalls to avoid
 ```
 
-3. Update `.claude-plugin/plugin.json`:
+3. Update `gemini-extension.json`:
 ```json
 {
   "components": {
@@ -154,7 +148,7 @@ Concrete example of using the skill
    - Should it invoke `fairmind-context` first?
    - Does it build on other skills?
 
-4. Update `.claude-plugin/plugin.json`
+4. Update `gemini-extension.json`
 5. Update README.md
 6. Test skill with multiple agents
 7. Document skill interactions in README
@@ -285,7 +279,7 @@ You are helping with [task description].
 - [ ] Code follows existing patterns
 - [ ] All tests pass locally
 - [ ] Documentation updated (README, CONTRIBUTING)
-- [ ] plugin.json updated if new components added
+- [ ] gemini-extension.json updated if new components added
 - [ ] Commit messages are clear and descriptive
 - [ ] No sensitive data in commits (API keys, etc.)
 
@@ -316,7 +310,7 @@ You are helping with [task description].
 ## Checklist
 - [ ] Tested with Fairmind MCP server
 - [ ] Documentation updated
-- [ ] plugin.json updated
+- [ ] gemini-extension.json updated
 - [ ] Follows existing patterns
 ```
 
@@ -338,12 +332,12 @@ We follow [Semantic Versioning](https://semver.org/):
 
 ## Release Process
 
-1. Update version in `.claude-plugin/plugin.json`
+1. Update version in `gemini-extension.json`
 2. Update CHANGELOG.md with changes
 3. Create git tag: `git tag v1.x.x`
 4. Push tag: `git push origin v1.x.x`
 5. Create GitHub release
-6. Publish to Claude Code marketplace (if applicable)
+6. Publish to Gemini CLI extensions registry (if applicable)
 
 ## Community Guidelines
 
@@ -359,7 +353,7 @@ We follow [Semantic Versioning](https://semver.org/):
 **Bug Reports:**
 - Describe expected vs actual behavior
 - Provide steps to reproduce
-- Include Claude Code version
+- Include Gemini CLI version
 - Include Fairmind MCP server version
 - Attach relevant logs/screenshots
 
@@ -379,18 +373,18 @@ cat > agents/mobile-engineer.md << 'EOF'
 You are Mobile Engineer, specializing in iOS and Android development...
 EOF
 
-# 3. Update plugin.json
-# Edit .claude-plugin/plugin.json
+# 3. Update extension metadata
+# Edit gemini-extension.json
 
 # 4. Test locally
-ln -s $(pwd) ~/.claude/plugins/fairmind-integration-dev
-# Open Claude Code and test agent
+ln -s $(pwd) ~/.gemini/extensions/fairmind-integration-dev
+# Open Gemini CLI and test agent
 
 # 5. Update documentation
 # Edit README.md
 
 # 6. Commit and push
-git add agents/mobile-engineer.md .claude-plugin/plugin.json README.md
+git add agents/mobile-engineer.md gemini-extension.json README.md
 git commit -m "feat(agents): add Mobile Engineer agent for iOS/Android development"
 git push origin feature/new-mobile-agent
 
@@ -413,6 +407,6 @@ By contributing, you agree that your contributions will be licensed under the MI
 Contributors will be acknowledged in:
 - README.md Contributors section
 - Release notes
-- Plugin marketplace listing (if applicable)
+- Extension registry listing (if applicable)
 
-Thank you for making the Fairmind Integration Plugin better!
+Thank you for making the Fairmind Integration Extension better!

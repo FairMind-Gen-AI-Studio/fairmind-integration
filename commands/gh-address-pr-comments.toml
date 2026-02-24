@@ -1,3 +1,6 @@
+description = "Interactive PR comment resolution workflow"
+
+prompt = """
 # Address PR Comments Command
 
 Interactive PR comment resolution workflow.
@@ -74,3 +77,4 @@ Report changes made, remaining comments, and suggest next steps.
 - Uncommitted changes: Warn user first
 - File not found: Comment may be outdated
 - Ambiguous comment: Ask for clarification
+"""

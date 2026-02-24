@@ -1,9 +1,12 @@
+description = "Comprehensive multi-perspective PR review"
+
+prompt = """
 # PR Review
 
-**PR Link/Number**: $ARGUMENTS
+**PR Link/Number**: {{args}}
 
-> **Instructions**: Execute each task in the order given to conduct a thorough code review.  Update GitHub with this review.
-> **Important**: The future is now—any improvements or “future” recommendations must be addressed **immediately**.
+> **Instructions**: Execute each task in the order given to conduct a thorough code review. Update GitHub with this review.
+> **Important**: The future is now—any improvements or "future" recommendations must be addressed **immediately**.
 
 ---
 
@@ -14,7 +17,7 @@
 - **User Experience**: Is the change intuitive and delightful for users right now? If not, make fixes immediately.
 - **Strategic Alignment**: Does the PR align with current (and long-term, i.e., now) strategic objectives?
 
-**Action**: Provide clear directives on how to ensure maximum user and business impact. All “future” suggestions must be implemented now.
+**Action**: Provide clear directives on how to ensure maximum user and business impact. All "future" suggestions must be implemented now.
 
 ---
 
@@ -34,9 +37,9 @@
 **Objective**: Verify the overall quality, testing strategy, and reliability of the solution:
 1. **Test Coverage**: Are there sufficient tests (unit, integration, E2E)? If not, add them now.
 2. **Potential Bugs & Edge Cases**: Have all edge cases been considered? If not, address them immediately.
-3. **Regression Risk**: Confirm changes don’t undermine existing functionality. If risk is identified, mitigate now with additional checks or tests.
+3. **Regression Risk**: Confirm changes don't undermine existing functionality. If risk is identified, mitigate now with additional checks or tests.
 
-**Action**: Provide a detailed QA assessment, insisting any “future” improvements be completed right away.
+**Action**: Provide a detailed QA assessment, insisting any "future" improvements be completed right away.
 
 ---
 
@@ -47,7 +50,7 @@
 2. **Data Handling**: Are we properly protecting sensitive data (e.g., encryption, sanitization)? Address all gaps now.
 3. **Compliance**: Confirm alignment with any relevant security or privacy standards (e.g., OWASP, GDPR, HIPAA). Implement missing requirements immediately.
 
-**Action**: Provide a security assessment. Any recommended fixes typically scheduled for “later” must be addressed now.
+**Action**: Provide a security assessment. Any recommended fixes typically scheduled for "later" must be addressed now.
 
 ---
 
@@ -69,8 +72,9 @@
 2. **Usability & Accessibility**: Validate that the UI is intuitive and compliant with accessibility standards. Make any corrections immediately.
 3. **Interaction Flow**: Assess whether the user flow is seamless. If friction exists, refine now.
 
-**Action**: Provide a detailed UI/UX evaluation. Any enhancements typically set for “later” must be done immediately.
+**Action**: Provide a detailed UI/UX evaluation. Any enhancements typically set for "later" must be done immediately.
 
 ---
 
 **End of PR Review**
+"""

@@ -1,3 +1,6 @@
+description = "Auto-detect, analyze, fix CI/CD failures on any branch"
+
+prompt = """
 # Fix CI
 
 Auto-detect, analyze, fix CI/CD failures on any branch.
@@ -76,3 +79,4 @@ Next: /commit then git push
 /gh-fix-ci 123          # PR number
 /gh-fix-ci https://...  # PR URL
 ```
+"""

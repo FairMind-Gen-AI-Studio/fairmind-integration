@@ -1,9 +1,6 @@
----
-description: Deep analysis and problem solving mode
-category: utilities-debugging
-argument-hint: "Identify all stakeholders and constraints"
----
+description = "Deep analysis and problem solving mode"
 
+prompt = """
 # Deep Analysis and Problem Solving Mode
 
 Deep analysis and problem solving mode
@@ -16,32 +13,32 @@ Deep analysis and problem solving mode
    - Prepare to explore the problem space comprehensively
 
 2. **Parse the Problem or Question**
-   - Extract the core challenge from: **$ARGUMENTS**
+   - Extract the core challenge from: {{args}}
    - Identify all stakeholders and constraints
    - Recognize implicit requirements and hidden complexities
    - Question assumptions and surface unknowns
 
 3. **Multi-Dimensional Analysis**
    Approach the problem from multiple angles:
-   
+
    ### Technical Perspective
    - Analyze technical feasibility and constraints
    - Consider scalability, performance, and maintainability
    - Evaluate security implications
    - Assess technical debt and future-proofing
-   
+
    ### Business Perspective
    - Understand business value and ROI
    - Consider time-to-market pressures
    - Evaluate competitive advantages
    - Assess risk vs. reward trade-offs
-   
+
    ### User Perspective
    - Analyze user needs and pain points
    - Consider usability and accessibility
    - Evaluate user experience implications
    - Think about edge cases and user journeys
-   
+
    ### System Perspective
    - Consider system-wide impacts
    - Analyze integration points
@@ -94,24 +91,24 @@ Deep analysis and problem solving mode
    - Core challenge
    - Key constraints
    - Critical success factors
-   
+
    ## Solution Options
    ### Option 1: [Name]
    - Description
    - Pros/Cons
    - Implementation approach
    - Risk assessment
-   
+
    ### Option 2: [Name]
    [Similar structure]
-   
+
    ## Recommendation
    - Recommended approach
    - Rationale
    - Implementation roadmap
    - Success metrics
    - Risk mitigation plan
-   
+
    ## Alternative Perspectives
    - Contrarian view
    - Future considerations
@@ -129,16 +126,16 @@ Deep analysis and problem solving mode
 
 ```bash
 # Architectural decision
-/project:ultra-think Should we migrate to microservices or improve our monolith?
+/ultra-think Should we migrate to microservices or improve our monolith?
 
 # Complex problem solving
-/project:ultra-think How do we scale our system to handle 10x traffic while reducing costs?
+/ultra-think How do we scale our system to handle 10x traffic while reducing costs?
 
 # Strategic planning
-/project:ultra-think What technology stack should we choose for our next-gen platform?
+/ultra-think What technology stack should we choose for our next-gen platform?
 
 # Design challenge
-/project:ultra-think How can we improve our API to be more developer-friendly while maintaining backward compatibility?
+/ultra-think How can we improve our API to be more developer-friendly while maintaining backward compatibility?
 ```
 
 ## Key Principles
@@ -157,3 +154,4 @@ Deep analysis and problem solving mode
 - Acknowledgment of uncertainties
 - Actionable recommendations
 - Novel insights or perspectives
+"""

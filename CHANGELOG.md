@@ -1,9 +1,48 @@
 # Changelog
 
-All notable changes to the Fairmind Integration Plugin will be documented in this file.
+All notable changes to the Fairmind Integration Extension will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [3.0.0] - 2026-02-24
+
+### Changed
+- **Major migration**: Converted from Claude Code plugin to Gemini CLI extension
+- Commands: Converted from Markdown (`.md`) to TOML format (`.toml`)
+- Agent frontmatter: Updated for Gemini CLI subagent format
+- Tool names: Mapped to Gemini CLI equivalents
+- Configuration: `~/.claude/settings.json` → `~/.gemini/settings.json`
+- Plugin directory: `.claude/plugins/` → `~/.gemini/extensions/`
+- Extension metadata: `.claude-plugin/plugin.json` → `gemini-extension.json`
+- Model references: Claude models → Gemini models throughout documentation
+
+### Updated Model References
+- AI/ML Skills: All Claude model references replaced with Gemini equivalents
+  - Claude Opus/Sonnet → Gemini 2.5 Pro
+  - Claude Haiku → Gemini 2.5 Flash
+- Cost optimization: Updated pricing tables for Gemini models
+- LLM optimization: Updated model selection guide and routing
+- Evaluation patterns: Updated model IDs in code examples
+- Agent architecture: Updated model references in patterns
+
+### Added
+- `gemini-extension.json` - Extension metadata for Gemini CLI
+- `GEMINI.md` - Gemini CLI-specific documentation
+
+### Removed
+- `.claude-plugin/plugin.json` - Replaced by `gemini-extension.json`
+- Claude Code CLI commands from documentation
+
+### Preserved
+- Skills system (cross-compatible open standard)
+- Fairmind MCP integration (unchanged)
+- Agent workflows and patterns (unchanged)
+- All core functionality and features
+
+**Note:** Skills remain cross-compatible as they follow an open standard format.
+
+---
 
 ## [2.2.0] - 2026-02-19
 

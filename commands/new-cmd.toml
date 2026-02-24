@@ -1,6 +1,9 @@
+description = "Create new Gemini commands following best practices"
+
+prompt = """
 # New Command
 
-Create new Claude commands following best practices.
+Create new Gemini commands following best practices.
 
 ## Interview Process
 
@@ -15,8 +18,8 @@ Create new Claude commands following best practices.
 
 **Check existing commands:**
 ```bash
-ls -la .claude/commands/     # Project
-ls -la ~/.claude/commands/   # User
+ls -la .gemini/commands/     # Project
+ls -la ~/.gemini/commands/   # User
 ```
 
 **Read similar ones for patterns:**
@@ -27,12 +30,12 @@ ls -la ~/.claude/commands/   # User
 
 ### 3. Determine Location
 
-**Project command** (.claude/commands/):
+**Project command** (.gemini/commands/):
 - Specific to this codebase
 - Uses project conventions
 - References project docs
 
-**User command** (~/.claude/commands/):
+**User command** (~/.gemini/commands/):
 - General-purpose
 - Reusable across projects
 - Personal productivity
@@ -113,7 +116,7 @@ git status --short
 ## Output
 
 ```
-✅ Command created: {location}/{name}.md
+✅ Command created: {location}/{name}.toml
 
 Usage: /{name} [args]
 Example: /{name} 123
@@ -126,3 +129,4 @@ Next: Test it, refine based on usage
 ```bash
 /new-cmd
 ```
+"""
