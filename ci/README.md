@@ -18,14 +18,14 @@ Every PR gets reviewed by Claude, which also verifies that the implementation is
      https://raw.githubusercontent.com/FairMind-Gen-AI-Studio/fairmind-integration/main/ci/fairmind-code-review.yml
    ```
 
-2. **Edit the file** and replace `YOUR_FAIRMIND_PROJECT_ID` with your actual FairMind project ID.
-   To find it, open Claude Code with the FairMind MCP server configured and ask:
+2. **Set your project ID** — open the file and change the `FAIRMIND_PROJECT_ID` env var at the top:
 
-   ```
-   What's my FairMind project ID?
+   ```yaml
+   env:
+     FAIRMIND_PROJECT_ID: "your-actual-project-id"
    ```
 
-   Claude will call `General_list_projects` and return your project ID.
+   Don't know your project ID? Open Claude Code with the FairMind MCP server configured and ask *"What's my FairMind project ID?"*
 
 3. **Add secrets** to your repo (Settings > Secrets and variables > Actions):
 
