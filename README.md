@@ -139,9 +139,9 @@ For automatic installation across your team, add to your repository's `.claude/s
 
 ## CI/CD: Automated Code Review
 
-This repo provides a **reusable GitHub Actions workflow** that runs Claude Code Review on every PR, with automatic FairMind requirements verification.
+AI-powered code review pipeline with FairMind requirements verification. Copy the workflow into your repo and every PR gets reviewed automatically.
 
-See **[ci/](./ci/)** for ready-to-use workflow files and full setup instructions.
+See **[ci/](./ci/)** for the workflow file and setup instructions.
 
 ## Plugin Structure
 

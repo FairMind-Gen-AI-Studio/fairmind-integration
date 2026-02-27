@@ -1,33 +1,19 @@
-name: Claude Code Review
+name: FairMind Code Review
 
 on:
-  workflow_call:
-    inputs:
-      fairmind_project_id:
-        description: "FairMind project ID for requirements verification"
-        required: true
-        type: string
-      fairmind_mcp_url:
-        description: "FairMind MCP server URL"
-        required: false
-        type: string
-        default: "https://project-context.fairmind.ai/mcp/mcp"
-    secrets:
-      CLAUDE_CODE_OAUTH_TOKEN:
-        description: "Claude Code OAuth token"
-        required: true
-      FAIRMIND_API_KEY:
-        description: "FairMind API key for MCP access"
-        required: true
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
 
 concurrency:
-  group: claude-review-${{ github.event.pull_request.number }}
+  group: fairmind-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   claude-review:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
+    env:
+      FAIRMIND_PROJECT_ID: "YOUR_FAIRMIND_PROJECT_ID"  # Replace with your project ID
     permissions:
       contents: read
       pull-requests: write
@@ -38,15 +24,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Create FairMind MCP Config
         env:
           FAIRMIND_API_KEY: ${{ secrets.FAIRMIND_API_KEY }}
-          FAIRMIND_MCP_URL: ${{ inputs.fairmind_mcp_url }}
         run: |
           jq -n \
-            --arg url "$FAIRMIND_MCP_URL" \
+            --arg url "https://project-context.fairmind.ai/mcp/mcp" \
             --arg key "$FAIRMIND_API_KEY" \
             '{
               mcpServers: {
@@ -63,15 +48,11 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
-          plugins: 'code-review@claude-code-plugins'
           claude_args: '--mcp-config /tmp/fairmind-mcp.json --allowedTools "mcp__FairMind__*"'
+          show_full_output: true
+          use_sticky_comment: true
           prompt: |
-            /code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}
-
-            ## FairMind Requirements Verification
-
-            After the standard code review, verify implementation coherence with FairMind using a journal-first approach to save tokens.
+            Review this pull request and verify implementation coherence with FairMind requirements using a journal-first approach to save tokens.
 
             ### Phase 1: Journal Check (always do this first)
             1. Look for journal files in the PR diff under `.fairmind/journals/`. They follow naming `TASK-{ID}_{agent}_journal.md`.
@@ -79,7 +60,7 @@ jobs:
             3. Extract the TASK IDs referenced in the journal filenames.
 
             ### Phase 2: FairMind Task Lookup
-            1. Use `mcp__FairMind__General_list_work_sessions` with project_id `${{ inputs.fairmind_project_id }}` to find active sessions.
+            1. Use `mcp__FairMind__General_list_work_sessions` with project_id `${{ env.FAIRMIND_PROJECT_ID }}` to find active sessions.
             2. Use `mcp__FairMind__Studio_get_task` with the TASK IDs from the journal to get the task requirements, acceptance criteria, and implementation plan.
             3. If no TASK ID found in journals or filenames, use PR title/branch to search tasks via `mcp__FairMind__Studio_list_development_tasks_by_session`.
 
