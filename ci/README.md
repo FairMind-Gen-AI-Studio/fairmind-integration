@@ -36,6 +36,10 @@ Every PR gets reviewed by Claude, which also verifies that the implementation is
 
 4. **Open a PR** — the review will trigger automatically.
 
+### Prerequisites
+
+This pipeline works best when the **FairMind coding agents** are used from the start to implement tasks from your Project Context. The agents produce journals (`.fairmind/journals/`) and follow the implementation plans defined in FairMind, giving the reviewer full traceability between requirements and code. Without that workflow, the review falls back to analyzing the raw diff — still useful, but less precise.
+
 ### What it does
 
 1. **Code review** with implementation coherence verification against FairMind requirements
