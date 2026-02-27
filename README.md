@@ -78,7 +78,7 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
   "mcpServers": {
     "Fairmind": {
       "type": "http",
-      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "url": "https://project-context.fairmind.ai/mcp/mcp/",
       "headers": {
         "Authorization": "Bearer YOUR_TOKEN_HERE"
       }
@@ -90,7 +90,7 @@ Add to your `~/.claude/settings.json` or project `.claude/settings.json`:
 **Option 2: Using Claude CLI**
 
 ```bash
-claude mcp add --transport http Fairmind https://project-context.mindstream.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
+claude mcp add --transport http Fairmind https://project-context.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
@@ -141,62 +141,7 @@ For automatic installation across your team, add to your repository's `.claude/s
 
 This repo provides a **reusable GitHub Actions workflow** that runs Claude Code Review on every PR, with automatic FairMind requirements verification.
 
-### Quick Setup (any org, any public/private repo)
-
-1. Add these secrets to your repo (Settings > Secrets and variables > Actions):
-   - `CLAUDE_CODE_OAUTH_TOKEN` — your Claude Code OAuth token
-   - `FAIRMIND_API_KEY` — your FairMind API key
-
-2. Create `.github/workflows/fairmind-code-review.yml` in your repo:
-
-```yaml
-name: FairMind Code Review
-on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
-
-permissions:
-  contents: read
-  pull-requests: read
-  issues: read
-  id-token: write
-
-jobs:
-  review:
-    permissions:
-      contents: read
-      pull-requests: read
-      issues: read
-      id-token: write
-    uses: FairMind-Gen-AI-Studio/fairmind-integration/.github/workflows/claude-code-review.yml@main
-    with:
-      fairmind_project_id: "YOUR_FAIRMIND_PROJECT_ID"
-    secrets:
-      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-      FAIRMIND_API_KEY: ${{ secrets.FAIRMIND_API_KEY }}
-```
-
-That's it. Every PR will get an AI-powered review with requirements coherence verification.
-
-### Inputs
-
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `fairmind_project_id` | Yes | — | Your FairMind project ID |
-| `fairmind_mcp_url` | No | `https://project-context.mindstream.fairmind.ai/mcp/mcp` | FairMind MCP endpoint |
-
-### What the review covers
-
-1. **Standard code review** via Claude's `code-review` plugin
-2. **Journal check** — looks for `.fairmind/**/journals/TASK-{ID}_*_journal.md` in the PR diff
-3. **FairMind task lookup** — fetches acceptance criteria and implementation plans
-4. **Coherence assessment** — journal vs requirements (text-vs-text when possible to save tokens)
-5. **Security spot-check** — crypto, input validation, concurrency, auth config, cookie handling
-6. **Structured report** — summary table, acceptance criteria checklist, security findings, scope check
-
-### For FairMind org members
-
-If you're in the `FairMind-Gen-AI-Studio` org, the workflow also appears as a starter template in **Actions > New workflow**.
+See **[ci/](./ci/)** for ready-to-use workflow files and full setup instructions.
 
 ## Plugin Structure
 
@@ -506,7 +451,7 @@ For consistent team setup, commit `.claude/settings.json` with:
   "mcpServers": {
     "Fairmind": {
       "type": "http",
-      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "url": "https://project-context.fairmind.ai/mcp/mcp/",
       "headers": {
         "Authorization": "Bearer ${env:FAIRMIND_TOKEN}"
       }

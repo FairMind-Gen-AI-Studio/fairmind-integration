@@ -11,7 +11,7 @@ on:
         description: "FairMind MCP server URL"
         required: false
         type: string
-        default: "https://project-context.mindstream.fairmind.ai/mcp/mcp"
+        default: "https://project-context.fairmind.ai/mcp/mcp"
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN:
         description: "Claude Code OAuth token"
@@ -30,7 +30,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 

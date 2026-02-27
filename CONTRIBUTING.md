@@ -20,7 +20,7 @@ Configure the Fairmind MCP server in your `~/.claude/settings.json`:
   "mcpServers": {
     "Fairmind": {
       "type": "http",
-      "url": "https://project-context.mindstream.fairmind.ai/mcp/mcp/",
+      "url": "https://project-context.fairmind.ai/mcp/mcp/",
       "headers": {
         "Authorization": "Bearer YOUR_TOKEN_HERE"
       }
@@ -32,7 +32,7 @@ Configure the Fairmind MCP server in your `~/.claude/settings.json`:
 Or use the Claude CLI:
 
 ```bash
-claude mcp add --transport http Fairmind https://project-context.mindstream.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
+claude mcp add --transport http Fairmind https://project-context.fairmind.ai/mcp/mcp/ --header "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### Local Development
