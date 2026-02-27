@@ -49,7 +49,6 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: '--mcp-config /tmp/fairmind-mcp.json --allowedTools "mcp__FairMind__*"'
-          show_full_output: true
           use_sticky_comment: true
           prompt: |
             Review this pull request and verify implementation coherence with FairMind requirements using a journal-first approach to save tokens.
