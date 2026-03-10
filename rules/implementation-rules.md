@@ -112,14 +112,22 @@ ${FAIRMIND_BASE}/journals/{task_id}_{agent_role}_journal.md
 - Implementation Lead verifies branch name before PR
 - PR creation blocked if branch name incorrect
 - Teammate must create new branch with correct name
+- After creating the branch, teammate MUST call the MCP tool `update_implementation_branch` to register it
+
+**After creating the branch, IMMEDIATELY call:**
+```
+update_implementation_branch(task_id="{task-id}", branch="agent/{task-id}")
+```
+This registers the branch in the implementation record and enables the automated merge detection job.
 
 **Verification:**
 ```bash
 git branch --show-current
 # Expected: agent/{task-id}
 ```
+Verify the MCP tool was called by checking `implementation.branch` is set on the task.
 
-**Exceptions:** NONE. Always use this format.
+**Exceptions:** NONE. Always use this format and register the branch.
 
 ---
 
