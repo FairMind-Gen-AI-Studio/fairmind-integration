@@ -1,0 +1,18 @@
+interface:
+  display_name: "QA Playwright"
+  short_description: "Playwright E2E testing, visual testing, selector strategies, and CI integration"
+  brand_color: "#2EAD33"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "playwright"
+      description: "Playwright browser automation for test execution"
+    - type: "mcp"
+      value: "context7"
+      description: "Library documentation lookup for Playwright"
+      transport: "streamable_http"
+      url: "https://mcp.context7.com/mcp"

@@ -1,0 +1,15 @@
+interface:
+  display_name: "Frontend React/NextJS"
+  short_description: "React, NextJS, TypeScript, Tailwind CSS, and Shadcn UI patterns and conventions"
+  brand_color: "#61DAFB"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "context7"
+      description: "Library documentation lookup for React, NextJS, Tailwind"
+      transport: "streamable_http"
+      url: "https://mcp.context7.com/mcp"

@@ -1,0 +1,13 @@
+interface:
+  display_name: "FairMind Context"
+  short_description: "Gather full FairMind context: project, session, user story, task plan, requirements"
+  brand_color: "#6366F1"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "fairmind"
+      description: "FairMind platform MCP server for requirements and project management"

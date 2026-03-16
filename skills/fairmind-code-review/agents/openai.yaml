@@ -1,0 +1,13 @@
+interface:
+  display_name: "FairMind Code Review"
+  short_description: "Plan-journal-code traceability, requirements verification, cross-repo checks"
+  brand_color: "#6366F1"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "fairmind"
+      description: "FairMind platform MCP server for plan and requirements verification"

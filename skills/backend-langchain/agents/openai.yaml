@@ -1,0 +1,15 @@
+interface:
+  display_name: "AI/LangChain"
+  short_description: "LangChain, LangGraph, RAG pipelines, prompt engineering, and memory management"
+  brand_color: "#1C3C3C"
+
+policy:
+  allow_implicit_invocation: true
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "context7"
+      description: "Library documentation lookup for LangChain, LangGraph"
+      transport: "streamable_http"
+      url: "https://mcp.context7.com/mcp"
