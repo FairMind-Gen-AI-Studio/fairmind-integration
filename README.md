@@ -1,10 +1,12 @@
-# Fairmind Integration Plugin for Claude Code
+# Fairmind Integration — Multi-Platform AI Agent Framework
 
-A comprehensive Claude Code plugin providing team collaboration with role-based agents and technology-specific skills. Features deep Fairmind platform integration with full traceability from implementation plans to code review.
+A cross-platform agent framework providing team collaboration with role-based agents and technology-specific skills. Works natively with **Claude Code**, **OpenAI Codex CLI**, **GitHub Copilot**, and **Google Antigravity**. Features deep Fairmind platform integration with full traceability from implementation plans to code review.
 
 ## Overview
 
-This plugin extends Claude Code with **6 role-based agents** and **9 technology-specific skills**, creating a complete team collaboration workflow with the Fairmind AI Studio platform. Agents focus on roles (what they do), while skills provide technology expertise (how they do it).
+This plugin provides **6 role-based agents** and **9 technology-specific skills**, creating a complete team collaboration workflow with the Fairmind AI Studio platform. Agents focus on roles (what they do), while skills provide technology expertise (how they do it).
+
+All agents and skills are defined once and mapped to each platform's native format via symlinks and platform-specific profile files.
 
 ## Key Features
 
@@ -97,36 +99,41 @@ Replace `YOUR_TOKEN_HERE` with your Fairmind authentication token.
 
 ## Installation
 
-### Option 1: Install from Marketplace (Recommended)
+### Prerequisites
+
+All platforms require the **Fairmind MCP Server** (see [MCP Server Configuration](#mcp-server-configuration) below).
+
+---
+
+### Claude Code
+
+**Option A: From Marketplace (Recommended)**
 
 ```bash
-# install the market place
+# Add the marketplace and install
 claude plugin marketplace add FairMind-Gen-AI-Studio/fairmind-integration
-
-# Install globally for all projects
 claude plugin install fairmind-integration
 
-# Or install for specific project
+# Or install for a specific project only
 cd your-project
 claude plugin install fairmind-integration --scope project
 ```
 
-### Option 2: Install from Source
+**Option B: From Source**
 
 ```bash
-# Clone the repository
 git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git
 
-# Create symbolic link to Claude Code plugins directory
+# Global install (all projects)
 ln -s $(pwd)/fairmind-integration ~/.claude/plugins/fairmind-integration
 
-# Or copy to project-specific location
+# Or project-local install
 cp -r fairmind-integration /path/to/your/project/.claude/plugins/fairmind-integration
 ```
 
-### Option 3: Team Installation
+**Option C: Team Auto-Install**
 
-For automatic installation across your team, add to your repository's `.claude/settings.json`:
+Add to your repository's `.claude/settings.json`:
 
 ```json
 {
@@ -137,80 +144,218 @@ For automatic installation across your team, add to your repository's `.claude/s
 }
 ```
 
+Skills are loaded from `skills/` and agents from `agents/` automatically.
+
+---
+
+### OpenAI Codex CLI
+
+Codex discovers subagents from `~/.codex/agents/` (global) or `.codex/agents/` (project). Skills are loaded from `.codex/skills/`.
+
+**Option A: Clone into your project (Recommended)**
+
+```bash
+cd your-project
+
+# Clone as a subdirectory or submodule
+git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git .fairmind-plugin
+
+# Symlink .codex into project root
+ln -s .fairmind-plugin/.codex .codex
+```
+
+The `.codex/skills` symlink already points to `skills/`, and `.codex/agents/` contains all 6 TOML subagent definitions.
+
+**Option B: Global install**
+
+```bash
+# Copy agents to global Codex config
+cp .codex/agents/*.toml ~/.codex/agents/
+
+# Copy skills to global Codex skills (create if needed)
+mkdir -p ~/.codex/skills
+cp -r skills/* ~/.codex/skills/
+```
+
+**Referencing subagents in prompts:**
+
+```
+"Have atlas_tech_lead retrieve the plan, then echo_software_engineer implement it."
+```
+
+See the [Codex subagents documentation](https://simonwillison.net/2026/Mar/16/codex-subagents/) and [AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md) for more details.
+
+---
+
+### GitHub Copilot
+
+Copilot discovers custom agents from `.github/agents/` in your repository. Skills in `.github/skills/` are available as context. No installation step needed — just commit the files.
+
+**Option A: Clone into your project (Recommended)**
+
+```bash
+cd your-project
+
+git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git .fairmind-plugin
+
+# Symlink Copilot directories into project root
+ln -s .fairmind-plugin/.github/agents .github/agents
+ln -s .fairmind-plugin/.github/skills .github/skills
+```
+
+**Option B: Copy directly**
+
+```bash
+# Copy agent profiles
+mkdir -p .github/agents
+cp .github/agents/*.agent.md your-project/.github/agents/
+
+# Symlink skills
+ln -s /path/to/fairmind-integration/skills your-project/.github/skills
+```
+
+**Option C: Organization-wide**
+
+Place agent profiles in your org's `.github` or `.github-private` repository under `agents/` to make them available across all repositories:
+
+```
+your-org/.github/
+└── agents/
+    ├── atlas-tech-lead.agent.md
+    ├── echo-software-engineer.agent.md
+    └── ...
+```
+
+Once committed to the default branch, agents appear automatically in VS Code (Chat panel → agent dropdown), JetBrains, and GitHub.com Copilot.
+
+See the [GitHub Copilot custom agents documentation](https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/create-custom-agents) for more details.
+
+---
+
+### Google Antigravity
+
+Antigravity discovers skills from `.agent/skills/` (workspace) or `~/.gemini/antigravity/skills/` (global). Workflows in `.agent/workflows/` provide subagent orchestration patterns.
+
+**Option A: Clone into your project (Recommended)**
+
+```bash
+cd your-project
+
+git clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git .fairmind-plugin
+
+# Symlink Antigravity directories into project root
+ln -s .fairmind-plugin/.agent/skills .agent/skills
+ln -s .fairmind-plugin/.agent/workflows .agent/workflows
+```
+
+**Option B: Global install**
+
+```bash
+# Copy skills to global Antigravity directory
+mkdir -p ~/.gemini/antigravity/skills
+cp -r skills/* ~/.gemini/antigravity/skills/
+
+# Copy workflows
+mkdir -p ~/.gemini/antigravity/global_workflows
+cp .agent/workflows/*.md ~/.gemini/antigravity/global_workflows/
+```
+
+**Option C: Direct workspace install**
+
+```bash
+mkdir -p .agent/skills .agent/workflows
+
+# Symlink each skill (or copy)
+for skill in skills/*/; do
+  ln -s "../../$skill" ".agent/skills/$(basename $skill)"
+done
+
+# Copy workflow definitions
+cp .agent/workflows/*.md your-project/.agent/workflows/
+```
+
+Skills are automatically discovered by Antigravity when placed in `.agent/skills/`. The agent matches keywords from each `SKILL.md` description to determine which skill to load for the current task.
+
+See the [Antigravity skills tutorial](https://codelabs.developers.google.com/getting-started-with-antigravity-skills) and the [skills placement guide](https://medium.com/google-cloud/confused-about-where-to-put-your-agent-skills-ea778f3c64f3) for more details.
+
 ## CI/CD: Automated Code Review
 
 AI-powered code review pipeline with FairMind requirements verification. Copy the workflow into your repo and every PR gets reviewed automatically.
 
 See **[ci/](./ci/)** for the workflow file and setup instructions.
 
-## Plugin Structure
+## Cross-Platform Architecture
+
+Skills are defined once in `skills/` and shared across all platforms via symlinks. Agents are translated into each platform's native format.
+
+```
+Platform          Skills Discovery Path      Agents/Subagents Path            Format
+────────────────  ─────────────────────────  ───────────────────────────────  ──────────────
+Claude Code       skills/ (direct)           agents/*.md                      Markdown
+OpenAI Codex      .codex/skills/ → skills/   .codex/agents/*.toml             TOML
+GitHub Copilot    .github/skills/ → skills/  .github/agents/*.agent.md        Markdown+YAML
+Antigravity       .agent/skills/ → skills/   .agent/workflows/subagent-*.md   Workflow MD
+```
+
+### Repository Structure
 
 ```
 fairmind-integration/
+│
+├── skills/                          # Canonical skill definitions (single source of truth)
+│   ├── fairmind-context/SKILL.md
+│   ├── fairmind-tdd/SKILL.md
+│   ├── fairmind-code-review/SKILL.md
+│   ├── frontend-react-nextjs/SKILL.md + references/
+│   ├── backend-nextjs/SKILL.md + references/
+│   ├── backend-python/SKILL.md + references/
+│   ├── backend-langchain/SKILL.md + references/
+│   ├── qa-playwright/SKILL.md + references/
+│   └── ai-ml-systems/SKILL.md + references/
+│
+├── agents/                          # Claude Code agents (canonical definitions)
+│   ├── tech-lead.md                 # Atlas - orchestration
+│   ├── software-engineer.md         # Echo - all implementation
+│   ├── qa-engineer.md               # Tess - testing
+│   ├── code-reviewer.md             # Echo - code review
+│   ├── debug-detective.md           # Debugging specialist
+│   └── cybersec-engineer.md         # Shield - security
+│
+├── .codex/                          # OpenAI Codex CLI
+│   ├── skills -> ../skills          # Symlink to shared skills
+│   └── agents/                      # TOML subagent definitions
+│       ├── atlas-tech-lead.toml
+│       ├── echo-software-engineer.toml
+│       ├── echo-code-reviewer.toml
+│       ├── tess-qa-engineer.toml
+│       ├── debug-detective.toml
+│       └── shield-cybersec-engineer.toml
+│
+├── .github/                         # GitHub Copilot
+│   ├── skills -> ../skills          # Symlink to shared skills
+│   └── agents/                      # Markdown+YAML agent profiles
+│       ├── atlas-tech-lead.agent.md
+│       ├── echo-software-engineer.agent.md
+│       ├── echo-code-reviewer.agent.md
+│       ├── tess-qa-engineer.agent.md
+│       ├── debug-detective.agent.md
+│       └── shield-cybersec-engineer.agent.md
+│
+├── .agent/                          # Google Antigravity
+│   ├── skills -> ../skills          # Symlink to shared skills
+│   └── workflows/                   # Workflow-based subagent definitions
+│       ├── subagent-atlas-tech-lead.md
+│       ├── subagent-echo-software-engineer.md
+│       ├── subagent-echo-code-reviewer.md
+│       ├── subagent-tess-qa-engineer.md
+│       ├── subagent-debug-detective.md
+│       └── subagent-shield-cybersec-engineer.md
+│
 ├── .claude-plugin/
-│   └── marketplace.json          # Plugin marketplace metadata
-├── agents/                       # 6 role-based agents
-│   ├── tech-lead.md              # Atlas - orchestration
-│   ├── software-engineer.md      # Echo - all implementation
-│   ├── qa-engineer.md            # Tess - testing
-│   ├── code-reviewer.md          # Echo - code review
-│   ├── debug-detective.md        # Debugging specialist
-│   ├── cybersec-engineer.md      # Shield - security
-│   └── archived/                 # Legacy agents (kept for reference)
-├── fairmind-context/             # Fairmind context skill
-│   └── SKILL.md
-├── fairmind-tdd/                 # TDD workflow skill
-│   └── SKILL.md
-├── fairmind-code-review/         # Code review skill
-│   └── SKILL.md
-├── frontend-react-nextjs/        # Frontend technology skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── react-patterns.md
-│       ├── nextjs-conventions.md
-│       ├── typescript-guidelines.md
-│       ├── tailwind-shadcn.md
-│       └── zustand-state.md
-├── backend-nextjs/               # NextJS backend skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── api-routes.md
-│       ├── mongodb-patterns.md
-│       ├── authentication.md
-│       └── error-handling.md
-├── backend-python/               # Python backend skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── fastapi-patterns.md
-│       ├── pydantic-models.md
-│       ├── async-patterns.md
-│       └── testing-patterns.md
-├── backend-langchain/            # LangChain/AI skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── chain-patterns.md
-│       ├── agent-patterns.md
-│       ├── rag-patterns.md
-│       ├── prompt-engineering.md
-│       └── memory-patterns.md
-├── qa-playwright/                # Playwright testing skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── test-patterns.md
-│       ├── selectors.md
-│       ├── visual-testing.md
-│       ├── mcp-tools.md
-│       └── ci-integration.md
-├── ai-ml-systems/                # AI/ML systems skill
-│   ├── SKILL.md
-│   └── references/
-│       ├── llm-optimization.md
-│       ├── agent-architecture.md
-│       ├── evaluation-patterns.md
-│       └── cost-optimization.md
-├── commands/                     # Slash commands
-│   ├── fix-issue.md
-│   └── ...
+│   └── marketplace.json             # Claude Code marketplace metadata
+├── commands/                        # Slash commands
+│   └── fix-issue.md
+├── ci/                              # CI/CD automated code review
 └── README.md
 ```
 
@@ -470,6 +615,14 @@ For consistent team setup, commit `.claude/settings.json` with:
 
 ## Version History
 
+**3.0.0** (2026-03-17)
+- Cross-platform support: Claude Code, OpenAI Codex CLI, GitHub Copilot, Google Antigravity
+- Skills unified under `skills/` with symlinks for each platform
+- Added 6 Codex TOML subagents in `.codex/agents/`
+- Added 6 Copilot agent profiles in `.github/agents/` (Markdown + YAML frontmatter)
+- Added 6 Antigravity workflow subagents in `.agent/workflows/`
+- CI/CD automated code review pipeline
+
 **2.0.0** (2024-12-04)
 - Reorganized from 12 function-specific agents to 6 role-based agents
 - Added 6 new technology-specific skills with reference files
@@ -497,6 +650,7 @@ Contributions welcome! Please:
 ## Acknowledgments
 
 Built for [Claude Code](https://claude.com/claude-code) by Anthropic.
+Cross-platform support for [OpenAI Codex CLI](https://github.com/openai/codex), [GitHub Copilot](https://github.com/features/copilot), and [Google Antigravity](https://antigravity.google).
 Integrates with [Fairmind AI Studio](https://fairmind.ai) platform.
 
 ## Support
