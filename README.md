@@ -278,6 +278,34 @@ Skills are automatically discovered by Antigravity when placed in `.agent/skills
 
 See the [Antigravity skills tutorial](https://codelabs.developers.google.com/getting-started-with-antigravity-skills) and the [skills placement guide](https://medium.com/google-cloud/confused-about-where-to-put-your-agent-skills-ea778f3c64f3) for more details.
 
+---
+
+### Quick Start: One-Prompt Bootstrap
+
+Instead of following the manual steps above, paste one of these prompts directly into your AI coding agent. It will clone the repo, set up the correct directories, and verify the installation automatically.
+
+**Claude Code:**
+```
+Clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git and follow the SETUP.md instructions for Claude Code to install all agents and skills in this workspace.
+```
+
+**OpenAI Codex CLI:**
+```
+Clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git into .fairmind-plugin and follow SETUP.md for Codex CLI setup. Link .codex directory and verify all 6 subagents and 9 skills are available.
+```
+
+**GitHub Copilot:**
+```
+Clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git into .fairmind-plugin and follow SETUP.md for GitHub Copilot setup. Link .github/agents and .github/skills, then commit to the default branch.
+```
+
+**Google Antigravity:**
+```
+Clone https://github.com/FairMind-Gen-AI-Studio/fairmind-integration.git into .fairmind-plugin and follow SETUP.md for Antigravity setup. Link .agent/skills and .agent/workflows, then verify all 9 skills are discovered.
+```
+
+The agent reads [`SETUP.md`](./SETUP.md) and executes the platform-specific steps autonomously.
+
 ## CI/CD: Automated Code Review
 
 AI-powered code review pipeline with FairMind requirements verification. Copy the workflow into your repo and every PR gets reviewed automatically.
