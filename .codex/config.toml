@@ -1,0 +1,42 @@
+# FairMind Integration - Codex Configuration
+# Project: fairmind-integration v2.5.0
+# Purpose: Custom subagents for team collaboration with FairMind platform
+
+[agents]
+max_threads = 6                    # One per agent role
+max_depth = 2                      # Atlas -> Echo/Tess -> skill chain
+job_max_runtime_seconds = 1800     # 30 minutes per agent job
+
+# ---------------------------------------------------------------------------
+# MCP Servers (placeholder – fill in connection details per deployment)
+# ---------------------------------------------------------------------------
+
+# FairMind platform – 40 tools across General, Studio, and Code namespaces
+# Provides: project/session management, requirements, user stories, tasks,
+#           tests, cross-repo code search, RAG document retrieval
+# [mcp_servers.fairmind]
+# url = "https://<your-fairmind-instance>/mcp"
+
+# Knowledge graph for entity/relation management
+# [mcp_servers.memory]
+# url = "http://localhost:<port>/mcp"
+
+# Structured reasoning support
+# [mcp_servers.sequential-thinking]
+# url = "http://localhost:<port>/mcp"
+
+# Library documentation lookup (Context7)
+# [mcp_servers.context7]
+# url = "https://mcp.context7.com/mcp"
+
+# MongoDB database access
+# [mcp_servers.mongodb]
+# url = "mongodb://<host>:<port>"
+
+# Playwright browser automation (QA testing)
+# [mcp_servers.playwright]
+# url = "http://localhost:<port>/mcp"
+
+# Puppeteer browser automation (alternative to Playwright)
+# [mcp_servers.puppeteer]
+# url = "http://localhost:<port>/mcp"

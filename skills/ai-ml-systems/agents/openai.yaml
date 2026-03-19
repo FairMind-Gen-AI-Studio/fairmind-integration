@@ -1,0 +1,7 @@
+interface:
+  display_name: "AI/ML Systems"
+  short_description: "AI system architecture, LLM optimization, multi-agent orchestration, and evaluation"
+  brand_color: "#FF6F00"
+
+policy:
+  allow_implicit_invocation: true
